@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>دنانير — المالية الذكية</title>
-<meta name="description" content="تطبيق دنانير لإدارة الأموال الشخصية باللغة العربية">
+<title>أموالي — المالية الذكية</title>
+<meta name="description" content="تطبيق أموالي لإدارة الأموال الشخصية باللغة العربية">
 <meta name="theme-color" content="#060d1f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="دنانير">
+<meta name="apple-mobile-web-app-title" content="أموالي">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23060d1f'/><text y='.9em' font-size='80' x='10'>💰</text></svg>">
 <script>
 // Service Worker — يشتغل offline
@@ -607,64 +607,138 @@ html.light .toast{background:rgba(240,246,255,.95)}
 .pwa-banner-close:hover{color:var(--text2)}
 .pwa-banner-close svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 /* ══ AUTH SCREEN ══ */
+/* ══ AUTH SCREEN — NEW DESIGN ══ */
 .auth-screen{
-  position:fixed;inset:0;z-index:500;
+  position:fixed;inset:0;z-index:1000;
   background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:24px;overflow-y:auto;
+  padding:20px;overflow-y:auto;
 }
 .auth-screen.hidden{display:none}
-.auth-logo-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:32px}
-.auth-logo{font-size:44px;font-weight:900;color:var(--teal);letter-spacing:-2px}
-.auth-logo-sub{font-size:14px;color:var(--text2);font-weight:600;letter-spacing:.5px}
-.auth-card{
-  width:100%;max-width:380px;
-  background:var(--card);border:1px solid var(--border);
-  border-radius:24px;padding:28px 24px;
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  box-shadow:0 24px 64px rgba(0,0,0,.4);
+
+/* Logo */
+.auth-logo-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:28px}
+.auth-logo-icon{
+  width:72px;height:72px;border-radius:22px;
+  background:linear-gradient(135deg,#0d2855,#1e4a9c,#2563eb);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 12px 40px rgba(45,212,191,.25);
+  margin-bottom:4px;
 }
-.auth-tabs{display:flex;background:var(--card2);border-radius:12px;padding:3px;margin-bottom:22px}
+.auth-logo-icon svg{width:34px;height:34px;stroke:var(--teal);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.auth-logo{font-size:32px;font-weight:900;color:var(--text);letter-spacing:-1.5px}
+.auth-logo span{color:var(--teal)}
+.auth-logo-sub{font-size:13px;color:var(--text2);font-weight:500;letter-spacing:.3px}
+
+/* Card */
+.auth-card{
+  width:100%;max-width:360px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:28px;
+  padding:28px 24px 24px;
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  box-shadow:0 32px 80px rgba(0,0,0,.45);
+  position:relative;overflow:hidden;
+}
+.auth-card::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(45,212,191,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* Google Button — البارز */
+.auth-google-btn{
+  width:100%;padding:14px 16px;
+  border:1.5px solid var(--border2);
+  border-radius:14px;
+  background:linear-gradient(135deg,rgba(66,133,244,.08),rgba(52,168,83,.05));
+  color:var(--text);
+  font-family:'Tajawal',sans-serif;
+  font-size:15px;font-weight:700;
+  cursor:pointer;transition:var(--tr);
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  position:relative;overflow:hidden;
+}
+.auth-google-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(66,133,244,.12),rgba(52,168,83,.08));
+  opacity:0;transition:var(--tr);
+}
+.auth-google-btn:hover::before{opacity:1}
+.auth-google-btn:hover{border-color:rgba(66,133,244,.4);transform:translateY(-1px);box-shadow:0 8px 24px rgba(66,133,244,.18)}
+.auth-google-btn:active{transform:scale(.98)}
+.auth-google-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.auth-google-icon{
+  width:36px;height:36px;border-radius:9px;
+  background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.auth-google-icon svg{width:20px;height:20px}
+
+/* Divider */
+.auth-divider{
+  display:flex;align-items:center;gap:10px;
+  margin:18px 0 16px;color:var(--text3);font-size:12px;font-weight:600;
+}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Tabs */
+.auth-tabs{display:flex;background:var(--card2);border-radius:12px;padding:3px;margin-bottom:20px}
 .auth-tab{flex:1;padding:9px;text-align:center;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;transition:var(--tr);color:var(--text2);border:none;background:transparent;font-family:inherit}
 .auth-tab.active{background:var(--teal);color:#041420}
-.auth-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:6px}
-.auth-sub{font-size:12.5px;color:var(--text2);margin-bottom:20px;line-height:1.5}
-.auth-form-group{margin-bottom:14px}
+
+/* Form */
+.auth-form-group{margin-bottom:13px;position:relative}
 .auth-label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:7px;display:block}
+.auth-input-wrap{position:relative;display:flex;align-items:center}
+.auth-input-icon{
+  position:absolute;right:13px;top:50%;transform:translateY(-50%);
+  color:var(--text3);pointer-events:none;
+}
+.auth-input-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .auth-input{
-  width:100%;background:var(--input);border:1.5px solid var(--border);
-  border-radius:11px;padding:12px 14px;color:var(--text);
+  width:100%;background:var(--input);
+  border:1.5px solid var(--border);
+  border-radius:12px;padding:12px 40px 12px 14px;
+  color:var(--text);
   font-family:'Tajawal',sans-serif;font-size:14px;font-weight:600;
   transition:var(--tr);direction:ltr;text-align:left;
 }
 .auth-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,212,191,.1);outline:none}
 .auth-input::placeholder{color:var(--text3);font-weight:400;direction:rtl;text-align:right}
+
+/* Sign in button */
 .auth-btn{
   width:100%;padding:14px;border:none;border-radius:12px;
   background:linear-gradient(135deg,var(--teal3),var(--teal));
   color:#041420;font-family:'Tajawal',sans-serif;font-size:15px;font-weight:800;
-  cursor:pointer;transition:var(--tr);margin-top:6px;
+  cursor:pointer;transition:var(--tr);margin-top:4px;
 }
 .auth-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(45,212,191,.3)}
 .auth-btn:active{transform:scale(.98)}
 .auth-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.auth-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text3);font-size:12px;font-weight:600}
-.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.auth-google-btn{
-  width:100%;padding:12px;border:1.5px solid var(--border);border-radius:12px;
-  background:var(--card2);color:var(--text);font-family:'Tajawal',sans-serif;
-  font-size:14px;font-weight:700;cursor:pointer;transition:var(--tr);
-  display:flex;align-items:center;justify-content:center;gap:10px;
-}
-.auth-google-btn:hover{border-color:var(--border2);background:var(--card)}
-.auth-google-btn svg{width:18px;height:18px}
-.auth-skip{margin-top:14px;text-align:center;font-size:12.5px;color:var(--text3)}
+
+/* Skip & extras */
+.auth-skip{margin-top:16px;text-align:center;font-size:12.5px;color:var(--text3)}
 .auth-skip-btn{color:var(--teal);font-weight:700;cursor:pointer;background:none;border:none;font-family:inherit;font-size:inherit;transition:var(--tr)}
 .auth-skip-btn:hover{color:var(--teal2)}
+
+/* Messages */
 .auth-error{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.25);border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--red);margin-bottom:13px;display:none}
 .auth-error.show{display:block}
 .auth-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--green);margin-bottom:13px;display:none}
 .auth-success.show{display:block}
+
+/* Auth title */
+.auth-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px}
+.auth-sub{font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.5}
+
+/* Forgot password */
+.auth-forgot{background:none;border:none;color:var(--teal);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:var(--tr);padding:0}
+.auth-forgot:hover{color:var(--teal2)}
 /* Supabase config setup modal */
 .setup-card{
   width:100%;max-width:380px;
@@ -731,90 +805,95 @@ html.light .toast{background:rgba(240,246,255,.95)}
 <body>
 <!-- ══ AUTH SCREEN ══ -->
 <div class="auth-screen hidden" id="authScreen">
+
+  <!-- Logo -->
   <div class="auth-logo-wrap">
-    <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#0d2855,#1e4a9c);display:flex;align-items:center;justify-content:center;margin-bottom:6px;box-shadow:0 8px 32px rgba(45,212,191,.2)">
-      <svg style="width:32px;height:32px;stroke:var(--teal);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    <div class="auth-logo-icon">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
     </div>
-    <div class="auth-logo">دنانير</div>
+    <div class="auth-logo">أمو<span style="color:var(--teal)">ا</span>لي</div>
     <div class="auth-logo-sub">المالية الذكية</div>
   </div>
 
-  <!-- Setup card — يظهر فقط إذا ما في بيانات Supabase -->
-  <div class="setup-card" id="supabaseSetup" style="display:none">
-    <div class="setup-title">
-      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      إعداد الاتصال بـ Supabase
-    </div>
-    <div class="setup-sub">
-      أضف بياناتك من <a class="setup-link" href="https://supabase.com/dashboard" target="_blank">Supabase Dashboard</a> ← Settings ← API
-    </div>
-    <div class="auth-form-group">
-      <label class="auth-label">Project URL</label>
-      <input class="auth-input" id="sbUrl" placeholder="https://xxxx.supabase.co" type="url">
-    </div>
-    <div class="auth-form-group">
-      <label class="auth-label">Anon Public Key</label>
-      <input class="auth-input" id="sbKey" placeholder="eyJhbGciOiJIUzI1NiIs..." type="text">
-    </div>
-    <button class="auth-btn" onclick="saveSupabaseConfig()">اتصال والمتابعة</button>
-    <div class="auth-skip" style="margin-top:12px"><button class="auth-skip-btn" onclick="skipAuth()">استخدام بدون حساب ←</button></div>
-  </div>
+  <!-- Main Card -->
+  <div class="auth-card" id="authCard">
 
-  <!-- Login / Register Card -->
-  <div class="auth-card" id="authCard" style="display:none">
+    <!-- Tabs -->
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin"    onclick="switchAuthTab('login')">دخول</button>
-      <button class="auth-tab"        id="tabRegister" onclick="switchAuthTab('register')">حساب جديد</button>
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">حساب جديد</button>
     </div>
 
-    <div id="authError"   class="auth-error"></div>
+    <!-- Messages -->
+    <div id="authError" class="auth-error"></div>
     <div id="authSuccess" class="auth-success"></div>
 
-    <!-- Google button — أعلى للتسهيل -->
+    <!-- ══ Google Button — بارز وكبير ══ -->
     <button class="auth-google-btn" onclick="doGoogleLogin()" id="googleBtn">
-      <svg viewBox="0 0 24 24" width="18" height="18">
-        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-      </svg>
+      <div class="auth-google-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+      </div>
       متابعة مع Google
     </button>
-    <div class="auth-divider">أو</div>
 
-    <!-- Login Form -->
+    <div class="auth-divider">أو بالبريد الإلكتروني</div>
+
+    <!-- ══ Login Form ══ -->
     <div id="loginForm">
       <div class="auth-form-group">
         <label class="auth-label">البريد الإلكتروني</label>
-        <input class="auth-input" id="loginEmail" type="email" placeholder="your@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+        <div class="auth-input-wrap">
+          <input class="auth-input" id="loginEmail" type="email" placeholder="your@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+          <span class="auth-input-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+        </div>
       </div>
       <div class="auth-form-group">
         <label class="auth-label">كلمة المرور</label>
-        <input class="auth-input" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        <div class="auth-input-wrap">
+          <input class="auth-input" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+          <span class="auth-input-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </div>
       </div>
-      <div style="text-align:left;margin-bottom:12px">
-        <button onclick="doForgotPassword()" style="background:none;border:none;color:var(--teal);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:var(--tr)">نسيت كلمة المرور؟</button>
+      <div style="text-align:left;margin-bottom:14px">
+        <button class="auth-forgot" onclick="doForgotPassword()">نسيت كلمة المرور؟</button>
       </div>
       <button class="auth-btn" id="loginBtn" onclick="doLogin()">دخول ومزامنة</button>
     </div>
 
-    <!-- Register Form -->
+    <!-- ══ Register Form ══ -->
     <div id="registerForm" style="display:none">
       <div class="auth-form-group">
         <label class="auth-label">الاسم الكامل</label>
-        <input class="auth-input" id="regName" type="text" placeholder="اسمك الكريم" style="direction:rtl;text-align:right" autocomplete="name">
+        <div class="auth-input-wrap">
+          <input class="auth-input" id="regName" type="text" placeholder="اسمك الكريم" style="direction:rtl;text-align:right;padding-right:14px" autocomplete="name">
+          <span class="auth-input-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        </div>
       </div>
       <div class="auth-form-group">
         <label class="auth-label">البريد الإلكتروني</label>
-        <input class="auth-input" id="regEmail" type="email" placeholder="your@email.com" autocomplete="email">
+        <div class="auth-input-wrap">
+          <input class="auth-input" id="regEmail" type="email" placeholder="your@email.com" autocomplete="email">
+          <span class="auth-input-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+        </div>
       </div>
       <div class="auth-form-group">
         <label class="auth-label">كلمة المرور</label>
-        <input class="auth-input" id="regPass" type="password" placeholder="8 أحرف على الأقل" autocomplete="new-password">
+        <div class="auth-input-wrap">
+          <input class="auth-input" id="regPass" type="password" placeholder="8 أحرف على الأقل" autocomplete="new-password">
+          <span class="auth-input-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </div>
       </div>
       <div class="auth-form-group">
         <label class="auth-label">تأكيد كلمة المرور</label>
-        <input class="auth-input" id="regPass2" type="password" placeholder="أعد كتابة كلمة المرور" onkeydown="if(event.key==='Enter')doRegister()">
+        <div class="auth-input-wrap">
+          <input class="auth-input" id="regPass2" type="password" placeholder="أعد كتابة كلمة المرور" onkeydown="if(event.key==='Enter')doRegister()">
+          <span class="auth-input-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </div>
       </div>
       <button class="auth-btn" id="registerBtn" onclick="doRegister()">إنشاء الحساب</button>
     </div>
@@ -864,7 +943,7 @@ html.light .toast{background:rgba(240,246,255,.95)}
 </div>
 
 <div class="aurora"><div class="aurora-orb"></div><div class="aurora-orb"></div><div class="aurora-orb"></div></div>
-<div class="loader-overlay" id="loader"><div class="loader-logo">دنانير</div><div class="loader-ring"></div><div class="loader-dots"><span></span><span></span><span></span></div></div>
+<div class="loader-overlay" id="loader"><div class="loader-logo">أموالي</div><div class="loader-ring"></div><div class="loader-dots"><span></span><span></span><span></span></div></div>
 
 <div class="app">
 <!-- HEADER -->
@@ -875,7 +954,7 @@ html.light .toast{background:rgba(240,246,255,.95)}
     <!-- Cloud status / User pill -->
     <div id="hdrUserArea" onclick="openProfileModal()"></div>
   </div>
-  <div class="hdr-title" id="hdrTitle"><span class="accent">دنانير</span></div>
+  <div class="hdr-title" id="hdrTitle"><span class="accent">أموالي</span></div>
 </header>
 
 <div class="save-indicator" id="saveIndicator">
@@ -890,7 +969,7 @@ html.light .toast{background:rgba(240,246,255,.95)}
     <div class="bc-glow1"></div><div class="bc-glow2"></div>
     <div class="bc-top">
       <div class="bc-pill"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> مارس 2026</div>
-      <div class="bc-pill" onclick="showToast('الدينار العراقي','info')"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> دنانير</div>
+      <div class="bc-pill" onclick="showToast('الدينار العراقي','info')"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> أموالي</div>
     </div>
     <div class="bc-lbl">الرصيد الكلي</div>
     <div class="bc-amount" id="homeBalance"><span id="homeBalNum" class="num">0</span><span class="bc-currency">د.ع</span></div>
@@ -1520,7 +1599,7 @@ function exportBackup(){
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download='dananir-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.download='amwali-backup-'+new Date().toISOString().slice(0,10)+'.json';
   a.click();
   URL.revokeObjectURL(a.href);
   showToast('✅ تم تصدير النسخة الاحتياطية','success');
@@ -1579,14 +1658,14 @@ function addRipple(e){const btn=e.currentTarget,r=document.createElement('span')
 /* ════════════════════════════════
    TABS
 ════════════════════════════════ */
-const TAB_TITLES={home:'دنانير',expenses:'سجل المصاريف',income:'سجل الدخل',kanban:'لوحة المتابعة',goals:'الأهداف',debts:'الديون',subscriptions:'الاشتراكات',bills:'الفواتير',analytics:'التحليل المالي',settings:'الإعدادات',budget:'الميزانية الشهرية'};
+const TAB_TITLES={home:'أموالي',expenses:'سجل المصاريف',income:'سجل الدخل',kanban:'لوحة المتابعة',goals:'الأهداف',debts:'الديون',subscriptions:'الاشتراكات',bills:'الفواتير',analytics:'التحليل المالي',settings:'الإعدادات',budget:'الميزانية الشهرية'};
 const FAB_MAP={expenses:'fabExp',income:'fabInc',goals:'fabGoal',debts:'fabDebt',subscriptions:'fabSub',bills:'fabBill',budget:'fabBudget'};
 function switchTab(t){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('screen-'+t).classList.add('active');
   const nb=document.getElementById('nav-'+t);if(nb)nb.classList.add('active');
-  document.getElementById('hdrTitle').innerHTML=t==='home'?'<span class="accent">دنانير</span>':TAB_TITLES[t]||'دنانير';
+  document.getElementById('hdrTitle').innerHTML=t==='home'?'<span class="accent">أموالي</span>':TAB_TITLES[t]||'أموالي';
   Object.values(FAB_MAP).forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('hidden')});
   if(FAB_MAP[t]){const fe=document.getElementById(FAB_MAP[t]);if(fe)fe.classList.remove('hidden');}
   curTab=t;document.getElementById('scrollWrap').scrollTop=0;
@@ -2215,7 +2294,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 /* ═══ لا تعدّل ما تحت هذا السطر ═══ */
 const SB_CONFIG_KEY  = 'dananir_sb_config';
-let supabase         = null;
+let sbClient = null;
 let currentUser      = null;
 let lastSyncAt       = null;
 let syncInProgress   = false;
@@ -2231,7 +2310,7 @@ function initSupabase(){
   const cfg = getSBConfig();
   if(!cfg || !cfg.url || !cfg.key) return false;
   try{
-    supabase = window.supabase.createClient(cfg.url, cfg.key, {
+    sbClient = window.supabase.createClient(cfg.url, cfg.key, {
       auth:{ persistSession:true, autoRefreshToken:true }
     });
     return true;
@@ -2243,30 +2322,11 @@ function initSupabase(){
 ════════════════════════════════ */
 function showAuthScreen(){
   document.getElementById('authScreen').classList.remove('hidden');
-  const cfg = getSBConfig();
-  if(cfg && cfg.url){
-    document.getElementById('supabaseSetup').style.display = 'none';
-    document.getElementById('authCard').style.display     = 'block';
-  } else {
-    document.getElementById('supabaseSetup').style.display = 'block';
-    document.getElementById('authCard').style.display     = 'none';
-  }
 }
 function hideAuthScreen(){ document.getElementById('authScreen').classList.add('hidden') }
 
 function saveSupabaseConfig(){
-  const url = document.getElementById('sbUrl').value.trim();
-  const key = document.getElementById('sbKey').value.trim();
-  if(!url || !url.includes('supabase')){ showAuthError('أدخل رابط Supabase الصحيح'); return; }
-  if(!key || key.length < 30){ showAuthError('أدخل المفتاح الصحيح (anon key)'); return; }
-  localStorage.setItem(SB_CONFIG_KEY, JSON.stringify({url, key}));
-  if(initSupabase()){
-    document.getElementById('supabaseSetup').style.display = 'none';
-    document.getElementById('authCard').style.display      = 'block';
-    showAuthMsg('تم الاتصال بنجاح ✓', 'success');
-  } else {
-    showAuthError('فشل الاتصال — تحقق من البيانات');
-  }
+  // هذه الدالة لم تعد مستخدمة — البيانات مضمّنة في الكود
 }
 
 function switchAuthTab(tab){
@@ -2303,14 +2363,14 @@ function setBtnLoading(id, loading, defaultText){
 
 /* ── Login ── */
 async function doLogin(){
-  if(!supabase){ showAuthError('Supabase غير مهيأ — أضف بياناتك في الكود'); return; }
+  if(!sbClient){ showAuthError('Supabase غير مهيأ — أضف بياناتك في الكود'); return; }
   const email = document.getElementById('loginEmail').value.trim();
   const pass  = document.getElementById('loginPass').value;
   if(!email){ showAuthError('أدخل البريد الإلكتروني'); return; }
   if(!pass)  { showAuthError('أدخل كلمة المرور'); return; }
   setBtnLoading('loginBtn', true, 'دخول ومزامنة');
   try{
-    const {data, error} = await supabase.auth.signInWithPassword({email, password:pass});
+    const {data, error} = await sbClient.auth.signInWithPassword({email, password:pass});
     if(error) throw error;
     currentUser = data.user;
     await onSignedIn(data.user, true);
@@ -2323,7 +2383,7 @@ async function doLogin(){
 
 /* ── Register ── */
 async function doRegister(){
-  if(!supabase){ showAuthError('Supabase غير مهيأ'); return; }
+  if(!sbClient){ showAuthError('Supabase غير مهيأ'); return; }
   const name  = document.getElementById('regName').value.trim();
   const email = document.getElementById('regEmail').value.trim();
   const pass  = document.getElementById('regPass').value;
@@ -2334,7 +2394,7 @@ async function doRegister(){
   if(pass !== pass2)  { showAuthError('كلمتا المرور غير متطابقتين'); return; }
   setBtnLoading('registerBtn', true, 'إنشاء الحساب');
   try{
-    const {data, error} = await supabase.auth.signUp({
+    const {data, error} = await sbClient.auth.signUp({
       email, password:pass,
       options:{ data:{full_name: name} }
     });
@@ -2355,11 +2415,11 @@ async function doRegister(){
 
 /* ── Google OAuth ── */
 async function doGoogleLogin(){
-  if(!supabase){ showAuthError('Supabase غير مهيأ'); return; }
+  if(!sbClient){ showAuthError('Supabase غير مهيأ'); return; }
   const btn = document.getElementById('googleBtn');
   if(btn){ btn.disabled=true; btn.style.opacity='.6'; }
   try{
-    const {error} = await supabase.auth.signInWithOAuth({
+    const {error} = await sbClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: location.origin + location.pathname,
@@ -2376,11 +2436,11 @@ async function doGoogleLogin(){
 
 /* ── Forgot Password ── */
 async function doForgotPassword(){
-  if(!supabase){ showAuthError('Supabase غير مهيأ'); return; }
+  if(!sbClient){ showAuthError('Supabase غير مهيأ'); return; }
   const email = document.getElementById('loginEmail').value.trim();
   if(!email){ showAuthError('أدخل بريدك الإلكتروني أولاً'); return; }
   try{
-    const {error} = await supabase.auth.resetPasswordForEmail(email, {
+    const {error} = await sbClient.auth.resetPasswordForEmail(email, {
       redirectTo: location.origin + location.pathname
     });
     if(error) throw error;
@@ -2399,7 +2459,7 @@ function skipAuth(){
 }
 
 async function doLogout(){
-  if(supabase) await supabase.auth.signOut().catch(()=>{});
+  if(sbClient) await sbClient.auth.signOut().catch(()=>{});
   currentUser = null;
   lastSyncAt  = null;
   updateHeaderUser(null);
@@ -2442,12 +2502,12 @@ async function onSignedIn(user, pullData=true){
 }
 
 async function syncToCloud(){
-  if(!supabase || !currentUser || syncInProgress) return;
+  if(!sbClient || !currentUser || syncInProgress) return;
   syncInProgress=true;
   setCloudStatus('syncing','جاري الحفظ...');
   try{
     const payload = {txList,goals,debts,budgets,subs,bills,exchangeRate};
-    const {error} = await supabase.from('user_data').upsert({
+    const {error} = await sbClient.from('user_data').upsert({
       user_id: currentUser.id,
       data: payload,
       updated_at: new Date().toISOString()
@@ -2462,9 +2522,9 @@ async function syncToCloud(){
 }
 
 async function syncFromCloud(){
-  if(!supabase || !currentUser) return;
+  if(!sbClient || !currentUser) return;
   try{
-    const {data,error} = await supabase.from('user_data').select('data,updated_at').eq('user_id',currentUser.id).single();
+    const {data,error} = await sbClient.from('user_data').select('data,updated_at').eq('user_id',currentUser.id).single();
     if(error && error.code !== 'PGRST116') throw error; // PGRST116 = not found
     if(data && data.data){
       const d = data.data;
@@ -2615,7 +2675,7 @@ window.addEventListener('load',async ()=>{
   // 6. تهيئة Supabase وفحص الجلسة
   if(initSupabase()){
     try{
-      const {data:{session}} = await supabase.auth.getSession();
+      const {data:{session}} = await sbClient.auth.getSession();
       if(session){
         currentUser = session.user;
         updateHeaderUser(session.user);
@@ -2624,11 +2684,10 @@ window.addEventListener('load',async ()=>{
         setTimeout(()=>syncFromCloud(), 1500);
       } else {
         updateHeaderUser(null);
-        // انتظر قليلاً ثم اعرض شاشة الدخول
-        setTimeout(()=>showAuthScreen(), 2000);
+        showAuthScreen();
       }
       // استمع لتغيير حالة المصادقة
-      supabase.auth.onAuthStateChange(async (event, session)=>{
+      sbClient.auth.onAuthStateChange(async (event, session)=>{
         if(event==='SIGNED_IN' && session){
           currentUser=session.user;
           await onSignedIn(session.user, true);
@@ -2639,12 +2698,13 @@ window.addEventListener('load',async ()=>{
       });
     } catch(e){ console.warn('Session check failed',e); updateHeaderUser(null); }
   } else {
-    // ما في Supabase مهيأ — اعمل بوضع محلي
+    // ما في Supabase مهيأ — اعرض شاشة الدخول
     updateHeaderUser(null);
+    showAuthScreen();
   }
 
   // 7. إخفاء شاشة التحميل
-  setTimeout(()=>{const l=document.getElementById('loader');if(l)l.style.display='none'},1400);
+  setTimeout(()=>{const l=document.getElementById('loader');if(l){l.style.opacity='0';l.style.pointerEvents='none';setTimeout(()=>l.style.display='none',400)}},800);
 });
 </script>
 </body>
