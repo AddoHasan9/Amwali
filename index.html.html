@@ -3259,12 +3259,27 @@ function skipAuth(){
 }
 
 async function doLogout(){
-  if(sbClient) await sbClient.auth.signOut().catch(()=>{});
+  try{
+    if(sbClient) await sbClient.auth.signOut();
+  } catch(e){ console.warn('signOut error:',e); }
+  
   currentUser = null;
   lastSyncAt  = null;
-  updateHeaderUser(null);
+  
+  // أغلق الـ modal
   closeMod('profileModal');
-  showToast('تم تسجيل الخروج', 'info');
+  
+  // تحديث الهيدر
+  updateHeaderUser(null);
+  
+  // أعد تحميل البيانات المحلية
+  loadData();
+  renderHome();
+  
+  // أظهر شاشة الدخول
+  setTimeout(()=>{ showAuthScreen(); }, 300);
+  
+  showToast('تم تسجيل الخروج ✓', 'info');
 }
 
 /* ── Friendly error messages ── */
