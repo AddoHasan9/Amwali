@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <title>أموالي — المالية الذكية</title>
+  <meta name="description" content="تطبيق أموالي لإدارة الأموال الشخصية باللغة العربية">
+  <meta name="theme-color" content="#060d1f" id="themeColorMeta">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="أموالي">
+  <link rel="apple-touch-icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23060d1f'/><text y='.9em' font-size='80' x='10'>💰</text></svg>">
+  <script>
+    // Service Worker — يشتغل offline
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+    const CACHE='dananir-v1';
+    const ASSETS=['${location.href}'];
+    self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
+    self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{caches.open(CACHE).then(c=>c.put(e.request,res.clone()));return res;}))));
+  `;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(() => { });
+    }
+  </script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* CSS_PLACEHOLDER */
+  </style>
+</head>
+
+<body>
+  <!-- ══ AUTH SCREEN ══ -->
+  <div class="auth-screen hidden" id="authScreen">
+
+    <!-- Logo -->
+    <div class="auth-logo-wrap">
+      <div class="auth-logo-icon">
+        <svg viewBox="0 0 24 24">
+          <line x1="12" y1="1" x2="12" y2="23" />
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+      </div>
+      <div class="auth-logo">أمو<span style="color:var(--teal)">ا</span>لي</div>
+      <div class="auth-logo-sub">المالية الذكية</div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="auth-card" id="authCard">
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+        <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">حساب جديد</button>
+      </div>
+
+      <!-- Messages -->
+      <div id="authError" class="auth-error"></div>
+      <div id="authSuccess" class="auth-success"></div>
+
+      <!-- ══ Google Button — بارز وكبير ══ -->
+      <button class="auth-google-btn" onclick="doGoogleLogin()" id="googleBtn">
+        <div class="auth-google-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+            <path fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+          </svg>
+        </div>
+        متابعة مع Google
+      </button>
+
+      <div class="auth-divider">أو بالبريد الإلكتروني</div>
+
+      <!-- ══ Login Form ══ -->
+      <div id="loginForm">
+        <div class="auth-form-group">
+          <label class="auth-label">البريد الإلكتروني</label>
+          <div class="auth-input-wrap">
+            <input class="auth-input" id="loginEmail" type="email" placeholder="your@email.com" autocomplete="email"
+              onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+            <span class="auth-input-icon"><svg viewBox="0 0 24 24">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg></span>
+          </div>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">كلمة المرور</label>
+          <div class="auth-input-wrap">
+            <input class="auth-input" id="loginPass" type="password" placeholder="••••••••"
+              autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+            <span class="auth-input-icon"><svg viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg></span>
+          </div>
+        </div>
+        <div style="text-align:left;margin-bottom:14px">
+          <button class="auth-forgot" onclick="doForgotPassword()">نسيت كلمة المرور؟</button>
+        </div>
+        <button class="auth-btn" id="loginBtn" onclick="doLogin()">دخول ومزامنة</button>
+      </div>
+
+      <!-- ══ Register Form ══ -->
+      <div id="registerForm" style="display:none">
+        <div class="auth-form-group">
+          <label class="auth-label">الاسم الكامل</label>
+          <div class="auth-input-wrap">
+            <input class="auth-input" id="regName" type="text" placeholder="اسمك الكريم"
+              style="direction:rtl;text-align:right;padding-right:14px" autocomplete="name">
+            <span class="auth-input-icon"><svg viewBox="0 0 24 24">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg></span>
+          </div>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">البريد الإلكتروني</label>
+          <div class="auth-input-wrap">
+            <input class="auth-input" id="regEmail" type="email" placeholder="your@email.com" autocomplete="email">
+            <span class="auth-input-icon"><svg viewBox="0 0 24 24">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg></span>
+          </div>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">كلمة المرور</label>
+          <div class="auth-input-wrap">
+            <input class="auth-input" id="regPass" type="password" placeholder="8 أحرف على الأقل"
+              autocomplete="new-password">
+            <span class="auth-input-icon"><svg viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg></span>
+          </div>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">تأكيد كلمة المرور</label>
+          <div class="auth-input-wrap">
+            <input class="auth-input" id="regPass2" type="password" placeholder="أعد كتابة كلمة المرور"
+              onkeydown="if(event.key==='Enter')doRegister()">
+            <span class="auth-input-icon"><svg viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg></span>
+          </div>
+        </div>
+        <button class="auth-btn" id="registerBtn" onclick="doRegister()">إنشاء الحساب</button>
+      </div>
+
+      <div class="auth-skip">
+        <button class="auth-skip-btn" onclick="skipAuth()">تخطي — استخدام بدون حساب</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PROFILE MODAL ══ -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="profile-section">
+        <div class="profile-avatar-big" id="profileAvatarBig">؟</div>
+        <div style="font-size:16px;font-weight:800;text-align:center;color:var(--text);margin-bottom:4px"
+          id="profileName">—</div>
+        <div class="profile-email" id="profileEmail">—</div>
+        <div class="profile-joined" id="profileJoined">—</div>
+      </div>
+      <!-- Sync status -->
+      <div id="syncStatusSection" style="margin-bottom:13px">
+        <div
+          style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div class="text-subtitle">حالة المزامنة</div>
+            <div class="text-sub2" id="lastSyncTime">—</div>
+          </div>
+          <div class="cloud-status synced" id="profileSyncStatus" onclick="syncNow()">
+            <svg viewBox="0 0 24 24">
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+            </svg>
+            مزامنة الآن
+          </div>
+        </div>
+        <div
+          style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div class="text-subtitle">إجمالي السجلات</div>
+            <div class="text-sub2" id="profileRecordCount">—</div>
+          </div>
+          <div style="font-size:13px;font-weight:800;color:var(--teal)" id="profileDataSize">—</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">
+        <svg viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+        تسجيل الخروج
+      </button>
+      <button class="btn-cancel" style="width:100%;margin-top:9px" onclick="closeMod('profileModal')">إغلاق</button>
+    </div>
+  </div>
+
+  <div class="aurora">
+    <div class="aurora-orb"></div>
+    <div class="aurora-orb"></div>
+    <div class="aurora-orb"></div>
+  </div>
+  <div class="loader-overlay" id="loader">
+    <div class="loader-logo">أموالي</div>
+    <div style="font-size:12px;color:rgba(45,212,191,.6);margin-top:-8px;font-weight:500">المالية الذكية</div>
+    <div class="loader-ring"></div>
+    <div class="loader-dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <!-- Desktop Panel — يظهر فقط على الشاشات الكبيرة -->
+  <div class="desktop-wrapper" id="desktopWrapper">
+    <div class="desktop-panel" id="desktopPanel" style="display:none">
+
+      <!-- Welcome -->
+      <div class="dp-card" style="animation-delay:.05s">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div
+            style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--teal3),var(--teal));display:flex;align-items:center;justify-content:center">
+            <svg
+              style="width:22px;height:22px;stroke:#041420;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"
+              viewBox="0 0 24 24">
+              <line x1="12" y1="1" x2="12" y2="23" />
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+          </div>
+          <div>
+            <div style="font-size:18px;font-weight:900;color:var(--text)" id="dpWelcome">مرحباً!</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px" id="dpDate">—</div>
+          </div>
+        </div>
+        <div class="dp-stat-grid">
+          <div class="dp-stat">
+            <div class="dp-stat-lbl">الرصيد الكلي</div>
+            <div class="dp-stat-val" style="color:var(--teal)" id="dpBalance">0</div>
+            <div class="dp-stat-sub">دينار عراقي</div>
+          </div>
+          <div class="dp-stat">
+            <div class="dp-stat-lbl">معدل الادخار</div>
+            <div class="dp-stat-val" style="color:var(--green)" id="dpSavRate">0%</div>
+            <div class="dp-stat-sub">هذا الشهر</div>
+          </div>
+          <div class="dp-stat">
+            <div class="dp-stat-lbl">إجمالي الدخل</div>
+            <div class="dp-stat-val" style="color:var(--green)" id="dpInc">0</div>
+            <div class="dp-stat-sub" id="dpIncCount">0 عملية</div>
+          </div>
+          <div class="dp-stat">
+            <div class="dp-stat-lbl">إجمالي المصاريف</div>
+            <div class="dp-stat-val" style="color:var(--red)" id="dpExp">0</div>
+            <div class="dp-stat-sub" id="dpExpCount">0 مصروف</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="dp-card" style="animation-delay:.1s">
+        <div class="dp-title">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="16" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+          </svg>
+          إجراءات سريعة
+        </div>
+        <div class="dp-actions">
+          <button class="dp-action-btn dp-red" onclick="openTxModal('expense')">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+            إضافة مصروف
+          </button>
+          <button class="dp-action-btn dp-green" onclick="openTxModal('income')">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+            إضافة دخل
+          </button>
+          <button class="dp-action-btn dp-teal" onclick="switchTab('goals')">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="6" />
+              <circle cx="12" cy="12" r="2" />
+            </svg>
+            الأهداف المالية
+          </button>
+          <button class="dp-action-btn dp-amber" onclick="switchTab('debts')">
+            <svg viewBox="0 0 24 24">
+              <rect x="1" y="4" width="22" height="16" rx="2" />
+              <line x1="1" y1="10" x2="23" y2="10" />
+            </svg>
+            إدارة الديون
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="dp-card" style="animation-delay:.15s">
+        <div class="dp-title">
+          <svg viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          آخر العمليات
+        </div>
+        <div class="dp-tx-list" id="dpRecentTx">
+          <div style="text-align:center;color:var(--text3);font-size:12.5px;padding:20px 0">لا توجد عمليات بعد</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- App on right -->
+    <div class="app" id="mainApp">
+      <!-- HEADER -->
+      <header class="header" id="mainHdr">
+        <div class="hdr-actions">
+          <div class="icon-btn" onclick="onNotif()" id="notifBtn"><svg viewBox="0 0 24 24">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            <div class="notif-dot" id="notifDot"></div>
+          </div>
+          <div class="icon-btn" onclick="toggleBalance()"><svg viewBox="0 0 24 24" id="eyeSvg">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg></div>
+          <!-- Cloud status / User pill -->
+          <div id="hdrUserArea" onclick="openProfileModal()"></div>
+        </div>
+        <div class="hdr-title" id="hdrTitle"><span class="accent">أموالي</span></div>
+      </header>
+
+      <div class="save-indicator" id="saveIndicator">
+        <svg viewBox="0 0 24 24">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+          <polyline points="17 21 17 13 7 13 7 21" />
+          <polyline points="7 3 7 8 15 8" />
+        </svg>
+        تم الحفظ تلقائياً
+      </div>
+      <div class="scroll-wrap" id="scrollWrap">
+
+        <!-- ══════ HOME ══════ -->
+        <div class="screen active" id="screen-home">
+          <div class="balance-card" id="balanceCard">
+            <div class="bc-grid"></div>
+            <div class="bc-glow1"></div>
+            <div class="bc-top">
+              <div class="bc-pill" id="bcDatePill">
+                <svg viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                مارس 2026
+              </div>
+              <div class="bc-badge">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                IQD
+              </div>
+            </div>
+            <div class="bc-lbl">الرصيد الكلي</div>
+            <div class="bc-amount" id="homeBalance"><span id="homeBalNum" class="num">0</span><span
+                class="bc-currency">د.ع</span></div>
+            <div class="bc-change" id="bcChangeLine">
+              <span style="opacity:.5">هذا الشهر</span>
+              <span class="bc-change-badge" id="bcChangeBadge">
+                <svg viewBox="0 0 24 24" style="width:9px;height:9px;stroke:currentColor;fill:none;stroke-width:3">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                </svg>
+                0%
+              </span>
+            </div>
+            <div class="bc-footer">
+              <div class="bc-stat">
+                <div class="bc-stat-lbl">
+                  <svg viewBox="0 0 24 24">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                    <polyline points="17 6 23 6 23 12" />
+                  </svg>
+                  الدخل
+                </div>
+                <div class="bc-stat-val inc-clr num" id="homeInc">0</div>
+              </div>
+              <div class="bc-divider"></div>
+              <div class="bc-stat" style="align-items:center">
+                <div class="bc-stat-lbl">
+                  <svg viewBox="0 0 24 24">
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" />
+                  </svg>
+                  العمليات
+                </div>
+                <div class="bc-stat-val num" id="homeTx">0</div>
+              </div>
+              <div class="bc-divider"></div>
+              <div class="bc-stat">
+                <div class="bc-stat-lbl">
+                  <svg viewBox="0 0 24 24">
+                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+                    <polyline points="17 18 23 18 23 12" />
+                  </svg>
+                  المصاريف
+                </div>
+                <div class="bc-stat-val exp-clr num" id="homeExp">0</div>
+              </div>
+            </div>
+          </div>
+          <div class="sec-lbl">إجراءات سريعة</div>
+          <div class="qa-grid">
+            <div class="qa-btn ripple-host" onclick="openTxModal('expense');addRipple(event)">
+              <div class="qa-icon ic-red"><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="8" y1="12" x2="16" y2="12" />
+                </svg></div>
+              <div class="qa-lbl">إضافة مصروف</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="openTxModal('income');addRipple(event)">
+              <div class="qa-icon ic-green"><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="16" />
+                  <line x1="8" y1="12" x2="16" y2="12" />
+                </svg></div>
+              <div class="qa-lbl">إضافة دخل</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="switchTab('goals');addRipple(event)">
+              <div class="qa-icon ic-amber"><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="6" />
+                  <circle cx="12" cy="12" r="2" />
+                </svg></div>
+              <div class="qa-lbl">الأهداف</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="switchTab('debts');addRipple(event)">
+              <div class="qa-icon ic-rose"><svg viewBox="0 0 24 24">
+                  <rect x="1" y="4" width="22" height="16" rx="2" />
+                  <line x1="1" y1="10" x2="23" y2="10" />
+                </svg></div>
+              <div class="qa-lbl">الديون</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="switchTab('kanban');addRipple(event)">
+              <div class="qa-icon ic-sky"><svg viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                </svg></div>
+              <div class="qa-lbl">كانبان</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="switchTab('subscriptions');addRipple(event)">
+              <div class="qa-icon ic-blue"><svg viewBox="0 0 24 24">
+                  <polyline points="17 1 21 5 17 9" />
+                  <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                  <polyline points="7 23 3 19 7 15" />
+                  <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                </svg></div>
+              <div class="qa-lbl">الاشتراكات</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="switchTab('bills');addRipple(event)">
+              <div class="qa-icon ic-orange"><svg viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg></div>
+              <div class="qa-lbl">الفواتير</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="switchTab('analytics');addRipple(event)">
+              <div class="qa-icon ic-teal"><svg viewBox="0 0 24 24">
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                </svg></div>
+              <div class="qa-lbl">التحليلات</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="switchTab('savings');addRipple(event)">
+              <div class="qa-icon ic-teal"><svg viewBox="0 0 24 24">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg></div>
+              <div class="qa-lbl">حاسبة الادخار</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="switchTab('recurring');addRipple(event)">
+              <div class="qa-icon ic-blue"><svg viewBox="0 0 24 24">
+                  <polyline points="17 1 21 5 17 9" />
+                  <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                  <polyline points="7 23 3 19 7 15" />
+                  <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                </svg></div>
+              <div class="qa-lbl">المتكررة</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="switchTab('compare');addRipple(event)">
+              <div class="qa-icon ic-purple"><svg viewBox="0 0 24 24">
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                </svg></div>
+              <div class="qa-lbl">مقارنة الأشهر</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="switchTab('settings');addRipple(event)">
+              <div class="qa-icon ic-slate"><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="3" />
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg></div>
+              <div class="qa-lbl">الإعدادات</div>
+            </div>
+            <div class="qa-btn ripple-host" onclick="switchTab('budget');addRipple(event)">
+              <div class="qa-icon ic-amber"><svg viewBox="0 0 24 24">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg></div>
+              <div class="qa-lbl">الميزانية</div>
+            </div>
+          </div>
+          <div id="pwaBanner" style="display:none">
+            <div class="pwa-banner">
+              <div class="pwa-banner-icon"><svg viewBox="0 0 24 24">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg></div>
+              <div class="pwa-banner-info">
+                <div class="pwa-banner-title">ثبّت التطبيق على جهازك</div>
+                <div class="pwa-banner-sub">يشتغل بدون إنترنت وبأيقونة على الشاشة</div>
+              </div>
+              <button class="pwa-banner-btn" onclick="installPWA()">تثبيت</button>
+              <button class="pwa-banner-close" onclick="document.getElementById('pwaBanner').style.display='none'"><svg
+                  viewBox="0 0 24 24">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg></button>
+            </div>
+          </div>
+          <div class="achievement">
+            <div class="ach-icon"><svg viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="6" />
+                <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
+              </svg></div>
+            <div class="ach-body">
+              <div class="ach-title">مستوى الإنجاز</div>
+              <div class="ach-sub">أنت تحرز تقدماً رائعاً!</div>
+              <div class="ach-bar">
+                <div class="ach-fill" id="achFill"></div>
+              </div>
+            </div>
+            <div class="ach-num" id="achNum">0/10</div>
+          </div>
+          <div class="sec-lbl">أحدث العمليات</div>
+          <div class="px-16">
+            <div id="recentList"></div>
+            <div class="see-all" style="display:block;text-align:center;padding:10px 0" onclick="switchTab('expenses')">
+              عرض الكل ←</div>
+          </div>
+          <div class="spacer"></div>
+        </div>
+
+        <!-- ══ EXPENSES ══ -->
+        <div class="screen" id="screen-expenses">
+          <div class="log-hdr"><button class="period-btn"><svg viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg> مارس 2026</button>
+            <div class="view-toggle"><button class="vt" onclick="setV(this)">يومي</button><button class="vt active"
+                onclick="setV(this)">شهري</button></div>
+          </div>
+          <div class="cat-scroll" id="expCats">
+            <button class="cat-chip active" onclick="filterExp('الكل',this)"><svg viewBox="0 0 24 24">
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+              </svg> الكل</button>
+            <button class="cat-chip" onclick="filterExp('طعام',this)"><svg viewBox="0 0 24 24">
+                <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
+                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
+                <line x1="6" y1="1" x2="6" y2="4" />
+                <line x1="10" y1="1" x2="10" y2="4" />
+                <line x1="14" y1="1" x2="14" y2="4" />
+              </svg> طعام</button>
+            <button class="cat-chip" onclick="filterExp('مواصلات',this)"><svg viewBox="0 0 24 24">
+                <rect x="1" y="3" width="15" height="13" />
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                <circle cx="5.5" cy="18.5" r="2.5" />
+                <circle cx="18.5" cy="18.5" r="2.5" />
+              </svg> مواصلات</button>
+            <button class="cat-chip" onclick="filterExp('تسوق',this)"><svg viewBox="0 0 24 24">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+              </svg> تسوق</button>
+            <button class="cat-chip" onclick="filterExp('فواتير',this)"><svg viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg> فواتير</button>
+            <button class="cat-chip" onclick="filterExp('صحة',this)"><svg viewBox="0 0 24 24">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg> صحة</button>
+            <button class="cat-chip" onclick="filterExp('ترفيه',this)"><svg viewBox="0 0 24 24">
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" />
+              </svg> ترفيه</button>
+            <button class="cat-chip" onclick="filterExp('تعليم',this)"><svg viewBox="0 0 24 24">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg> تعليم</button>
+            <button class="cat-chip" onclick="filterExp('أخرى',this)"><svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg> أخرى</button>
+          </div>
+          <div class="sum-banner sb-exp">
+            <div>
+              <div class="sum-lbl">إجمالي المصاريف</div>
+              <div class="sum-amt num" id="totalExpAmt">0 د.ع</div>
+              <div class="sum-sub" id="expSubLbl">0 مصروف</div>
+            </div>
+            <div class="sum-icon"><svg viewBox="0 0 24 24">
+                <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+                <polyline points="17 18 23 18 23 12" />
+              </svg></div>
+          </div>
+          <div id="expenseList" class="px-16"></div>
+        </div>
+
+        <!-- ══ INCOME ══ -->
+        <div class="screen" id="screen-income">
+          <div class="log-hdr"><button class="period-btn"><svg viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg> مارس 2026</button>
+            <div class="view-toggle"><button class="vt" onclick="setV(this)">يومي</button><button class="vt active"
+                onclick="setV(this)">شهري</button></div>
+          </div>
+          <div class="cat-scroll" id="incCats">
+            <button class="cat-chip active" onclick="filterInc('الكل',this)"><svg viewBox="0 0 24 24">
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+              </svg> الكل</button>
+            <button class="cat-chip" onclick="filterInc('راتب',this)"><svg viewBox="0 0 24 24">
+                <rect x="2" y="7" width="20" height="14" rx="2" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+              </svg> راتب</button>
+            <button class="cat-chip" onclick="filterInc('استثمار',this)"><svg viewBox="0 0 24 24">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                <polyline points="16 7 22 7 22 13" />
+              </svg> استثمار</button>
+            <button class="cat-chip" onclick="filterInc('سلفة',this)"><svg viewBox="0 0 24 24">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg> سلفة</button>
+            <button class="cat-chip" onclick="filterInc('فري لانس',this)"><svg viewBox="0 0 24 24">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+              </svg> فري لانس</button>
+            <button class="cat-chip" onclick="filterInc('أخرى',this)"><svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg> أخرى</button>
+          </div>
+          <div class="sum-banner sb-inc">
+            <div>
+              <div class="sum-lbl">إجمالي الإيرادات</div>
+              <div class="sum-amt num" id="totalIncAmt">0 د.ع</div>
+              <div class="sum-sub" id="incSubLbl">0 عملية</div>
+            </div>
+            <div class="sum-icon"><svg viewBox="0 0 24 24">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg></div>
+          </div>
+          <div id="incomeList" class="px-16"></div>
+        </div>
+
+        <!-- ══ KANBAN ══ -->
+        <div class="screen" id="screen-kanban">
+          <div class="scr-header">
+            <div class="scr-title">لوحة المتابعة</div>
+            <div style="font-size:11px;color:var(--text3);font-weight:600">اسحب لتغيير الحالة</div>
+          </div>
+          <div class="kb-stats-row">
+            <div class="kb-stat-mini">
+              <div class="kb-stat-lbl">معلّق</div>
+              <div class="kb-stat-val" style="color:var(--amber)" id="kbP">0</div>
+            </div>
+            <div class="kb-stat-mini">
+              <div class="kb-stat-lbl">مراجعة</div>
+              <div class="kb-stat-val" style="color:var(--sky)" id="kbR">0</div>
+            </div>
+            <div class="kb-stat-mini">
+              <div class="kb-stat-lbl">مكتمل</div>
+              <div class="kb-stat-val" style="color:var(--green)" id="kbD">0</div>
+            </div>
+          </div>
+          <div class="kanban-wrap">
+            <div class="kanban-col col-pending">
+              <div class="kc-hdr">
+                <div class="kc-tw"><svg
+                    style="width:11px;height:11px;stroke:var(--amber);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+                    viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg><span class="kc-title">معلّق</span><span class="kc-cnt" id="pendCnt">0</span></div><button
+                  class="kc-add" onclick="openTxModal('expense')"><svg viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg></button>
+              </div>
+              <div class="drop-zone" id="col-pending" ondragover="onDragOver(event)" ondrop="onDrop(event,'pending')"
+                ondragleave="onDragLeave(event)"></div>
+            </div>
+            <div class="kanban-col col-review">
+              <div class="kc-hdr">
+                <div class="kc-tw"><svg
+                    style="width:11px;height:11px;stroke:var(--sky);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+                    viewBox="0 0 24 24">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg><span class="kc-title">مراجعة</span><span class="kc-cnt" id="revCnt">0</span></div><button
+                  class="kc-add"><svg viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg></button>
+              </div>
+              <div class="drop-zone" id="col-review" ondragover="onDragOver(event)" ondrop="onDrop(event,'review')"
+                ondragleave="onDragLeave(event)"></div>
+            </div>
+            <div class="kanban-col col-done">
+              <div class="kc-hdr">
+                <div class="kc-tw"><svg
+                    style="width:11px;height:11px;stroke:var(--green);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+                    viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg><span class="kc-title">مكتمل</span><span class="kc-cnt" id="doneCnt">0</span></div><button
+                  class="kc-add"><svg viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg></button>
+              </div>
+              <div class="drop-zone" id="col-done" ondragover="onDragOver(event)" ondrop="onDrop(event,'done')"
+                ondragleave="onDragLeave(event)"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ GOALS ══ -->
+        <div class="screen" id="screen-goals">
+          <div class="scr-header">
+            <div class="scr-title">أهدافي المالية</div><button onclick="openGoalModal()"
+              style="display:flex;align-items:center;gap:5px;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.3);border-radius:10px;padding:7px 13px;font-size:12.5px;font-weight:700;color:var(--teal);cursor:pointer;font-family:inherit;transition:var(--tr)"><svg
+                style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"
+                viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg> هدف جديد</button>
+          </div>
+          <div class="goals-list" id="goalsList"></div>
+        </div>
+
+        <!-- ══ DEBTS ══ -->
+        <div class="screen" id="screen-debts">
+          <div class="scr-header">
+            <div class="scr-title">إدارة الديون</div>
+            <div style="font-size:11px;color:var(--text3);font-weight:600">اضغط على الدين للتفاصيل</div>
+          </div>
+          <div class="debt-summary-row">
+            <div class="debt-sum-card dsc-red">
+              <div class="ds-lbl">ديون نشطة</div>
+              <div class="ds-val num" id="activeDebtTotal">0 د.ع</div>
+            </div>
+            <div class="debt-sum-card dsc-green">
+              <div class="ds-lbl">ديون مسددة</div>
+              <div class="ds-val num" id="paidDebtTotal">0 د.ع</div>
+            </div>
+            <div class="debt-sum-card dsc-blue">
+              <div class="ds-lbl">دين لي</div>
+              <div class="ds-val num" id="lendDebtTotal">0 د.ع</div>
+            </div>
+          </div>
+          <div id="debtList"></div>
+        </div>
+
+        <!-- ══ BUDGET ══ -->
+        <div class="screen" id="screen-budget">
+          <div class="scr-header">
+            <div class="scr-title">الميزانية الشهرية</div>
+            <button onclick="openBudgetModal(null)"
+              style="display:flex;align-items:center;gap:5px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:7px 13px;font-size:12.5px;font-weight:700;color:var(--amber);cursor:pointer;font-family:inherit;transition:var(--tr)"><svg
+                style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"
+                viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg> فئة جديدة</button>
+          </div>
+          <div class="budget-overview">
+            <div class="bov-card">
+              <div class="bov-lbl">الميزانية الكلية</div>
+              <div class="bov-val" style="color:var(--teal)" id="budgetTotal">0 د.ع</div>
+            </div>
+            <div class="bov-card">
+              <div class="bov-lbl">المصروف الفعلي</div>
+              <div class="bov-val" style="color:var(--amber)" id="budgetSpent">0 د.ع</div>
+            </div>
+            <div class="bov-card">
+              <div class="bov-lbl">المتبقي</div>
+              <div class="bov-val" style="color:var(--green)" id="budgetRemain">0 د.ع</div>
+            </div>
+          </div>
+          <div id="budgetList"></div>
+        </div>
+
+        <!-- ══ SUBSCRIPTIONS ══ -->
+        <div class="screen" id="screen-subscriptions">
+          <div class="scr-header">
+            <div class="scr-title">الاشتراكات الشهرية</div>
+          </div>
+          <div class="sub-total-card">
+            <div>
+              <div class="stc-label">إجمالي الاشتراكات / شهر</div>
+              <div class="stc-amt num" id="subTotalAmt">0 د.ع</div>
+            </div>
+            <div class="stc-icon"><svg viewBox="0 0 24 24">
+                <polyline points="17 1 21 5 17 9" />
+                <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                <polyline points="7 23 3 19 7 15" />
+                <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+              </svg></div>
+          </div>
+          <div id="subList"></div>
+        </div>
+
+        <!-- ══ BILLS ══ -->
+        <div class="screen" id="screen-bills">
+          <div class="scr-header">
+            <div class="scr-title">الفواتير</div>
+          </div>
+          <div class="bill-total-row">
+            <div class="btc">
+              <div class="btc-lbl">مستحقة</div>
+              <div class="btc-val exp-clr num" id="billPendTotal">0 د.ع</div>
+            </div>
+            <div class="btc">
+              <div class="btc-lbl">مدفوعة</div>
+              <div class="btc-val inc-clr num" id="billPaidTotal">0 د.ع</div>
+            </div>
+            <div class="btc">
+              <div class="btc-lbl">متأخرة</div>
+              <div class="btc-val" style="color:var(--red)" id="billOverTotal">0 د.ع</div>
+            </div>
+          </div>
+          <div id="billList"></div>
+        </div>
+
+        <!-- ══ ANALYTICS ══ -->
+        <div class="screen" id="screen-analytics">
+          <div style="padding:12px 16px 4px;display:flex;align-items:center;justify-content:space-between">
+            <div class="scr-title">التحليل المالي</div>
+            <div onclick="showToast('✨ جاري تحليل بياناتك...','info')"
+              style="display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);padding:6px 12px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;color:#fff">
+              <svg
+                style="width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+                viewBox="0 0 24 24">
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg> رؤى ذكية</div>
+          </div>
+          <div style="padding:0 16px 12px"><button class="period-btn" style="font-size:12px">📅 مارس 2026</button></div>
+          <div class="health-grid">
+            <div class="health-mini">
+              <div class="hm-box"><svg viewBox="0 0 24 24">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg></div>
+              <div class="hm-val" id="savRatePct">0%</div>
+              <div class="hm-lbl">معدل الادخار</div>
+            </div>
+            <div class="health-main">
+              <div class="hm-main-lbl">الصحة المالية</div>
+              <div class="hm-main-pct" id="healthPct">0%</div>
+              <div class="hm-badge" id="healthBadge">جيد</div>
+            </div>
+          </div>
+          <div class="action-tiles">
+            <div class="action-tile" onclick="showToast('جاري المشاركة...','info')">
+              <div class="at-icon ic-blue"><svg viewBox="0 0 24 24">
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg></div>
+              <div class="at-lbl">مشاركة</div>
+            </div>
+            <div class="action-tile" onclick="showToast('✨ AI قريباً','info')">
+              <div class="at-icon ic-purple"><svg viewBox="0 0 24 24">
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg></div>
+              <div class="at-lbl">استشارة AI</div>
+            </div>
+            <div class="action-tile" onclick="showToast('جاري تصدير PDF...','info')">
+              <div class="at-icon ic-teal"><svg viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg></div>
+              <div class="at-lbl">PDF</div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="cc-hdr">
+              <div class="cc-title">مقارنة النشاط</div>
+              <div class="cc-sub">6 أشهر</div>
+            </div>
+            <div class="legend">
+              <div class="leg-item">
+                <div class="leg-dot" style="background:var(--green)"></div>الدخل
+              </div>
+              <div class="leg-item">
+                <div class="leg-dot" style="background:var(--red)"></div>المصاريف
+              </div>
+            </div>
+            <div class="chart-wrap"><canvas id="activityChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="cc-hdr">
+              <div class="cc-title">توزيع المصاريف</div>
+            </div>
+            <div class="chart-wrap"><canvas id="catChart"></canvas></div>
+          </div>
+          <div class="sec-lbl">رؤى مالية</div>
+          <div class="insights-row" id="insightsList"></div>
+          <div class="chart-card" style="margin-top:11px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div class="text-subtitle">توقعات الشهر القادم</div>
+                <div class="text-sub2">بناءً على عاداتك</div>
+              </div><svg
+                style="width:17px;height:17px;stroke:var(--teal);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+                viewBox="0 0 24 24">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 7 22 7 22 12" />
+              </svg>
+            </div>
+            <div style="font-size:24px;font-weight:900;margin-top:9px;color:var(--text)" class="num" id="predAmt">0
+              <span style="font-size:13px;font-weight:500;color:var(--text2)">د.ع</span></div>
+            <div
+              style="display:inline-block;background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.22);padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;margin-top:7px">
+              دقة عالية ✓</div>
+          </div>
+          <div class="spacer"></div>
+        </div>
+
+        <!-- ══ SETTINGS ══ -->
+        <div class="screen" id="screen-settings">
+          <div class="settings-group">
+            <div class="settings-row" onclick="showToast('الملف الشخصي قريباً','info')">
+              <div class="sr-icon ic-blue"><svg viewBox="0 0 24 24">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg></div>
+              <div class="sr-info">
+                <div class="sr-title">الحساب والملف الشخصي</div>
+                <div class="sr-sub">إدارة الحساب والمزامنة</div>
+              </div>
+              <div class="sr-arr"><svg viewBox="0 0 24 24">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg></div>
+            </div>
+            <div class="settings-row" id="adminNavBtn" style="display:none" onclick="switchTab('admin')">
+              <div class="sr-icon"
+                style="background:linear-gradient(135deg,rgba(244,63,94,.2),rgba(244,63,94,.1));border:1px solid rgba(244,63,94,.2)">
+                <svg viewBox="0 0 24 24"
+                  style="stroke:var(--red);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+              <div class="sr-info">
+                <div class="sr-title" style="color:var(--red)">لوحة الإدارة</div>
+                <div class="sr-sub">إحصائيات وإدارة المستخدمين</div>
+              </div>
+              <div class="sr-arr"><svg viewBox="0 0 24 24">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg></div>
+            </div>
+          </div>
+          <div class="settings-group">
+            <div class="sg-hdr">
+              <div class="sg-title">الإعدادات العامة</div>
+              <div class="sg-ico ic-slate"><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="3" />
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg></div>
+            </div>
+            <div class="settings-row" onclick="requestPushPermission()">
+              <div class="sr-icon ic-amber" style="flex-shrink:0"><svg viewBox="0 0 24 24">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg></div>
+              <div class="sr-info">
+                <div class="sr-title">إشعارات Push</div>
+                <div class="sr-sub">تفعيل تنبيهات الفواتير والديون والميزانية</div>
+              </div>
+              <div
+                style="font-size:11px;color:var(--teal);font-weight:700;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);padding:4px 10px;border-radius:20px">
+                تفعيل</div>
+            </div>
+            <div class="toggle-row">
+              <div class="sr-icon ic-blue" style="flex-shrink:0"><svg viewBox="0 0 24 24">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg></div>
+              <div class="sr-info">
+                <div class="sr-title">إشعارات داخلية</div>
+                <div class="sr-sub">تنبيهات المصاريف والأهداف</div>
+              </div>
+              <div class="tw on" id="tw-notif" onclick="toggleTw(this)">
+                <div class="tw-knob"></div>
+              </div>
+            </div>
+            <div style="padding:10px 17px 6px;border-bottom:1px solid var(--border)">
+              <div
+                style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:9px;display:flex;align-items:center;gap:6px">
+                <svg
+                  style="width:15px;height:15px;stroke:var(--purple);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+                  viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg> المظهر</div>
+              <div class="theme-grid">
+                <div class="theme-opt" id="thDark" onclick="setTheme('dark',this)"><svg viewBox="0 0 24 24">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                  </svg>داكن</div>
+                <div class="theme-opt active" id="thLight" onclick="setTheme('light',this)"><svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="5" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                  </svg>فاتح</div>
+                <div class="theme-opt" id="thSystem" onclick="setTheme('system',this)"><svg viewBox="0 0 24 24">
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <line x1="8" y1="21" x2="16" y2="21" />
+                    <line x1="12" y1="17" x2="12" y2="21" />
+                  </svg>تلقائي</div>
+              </div>
+            </div>
+          </div>
+          <!-- Currency & Rate -->
+          <div class="settings-group">
+            <div class="sg-hdr">
+              <div class="sg-title">اللغة والعملة</div>
+              <div class="sg-ico ic-teal"><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path
+                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg></div>
+            </div>
+            <div class="action-row ar-green" style="margin:9px 17px" onclick="showToast('دينار عراقي','info')">
+              <div class="ar-left">
+                <div class="ar-title">العملة الأساسية</div>
+                <div class="ar-sub">دينار عراقي (IQD)</div>
+              </div>
+              <div class="ar-right">
+                <div class="ar-icon"><svg viewBox="0 0 24 24">
+                    <line x1="12" y1="1" x2="12" y2="23" />
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                  </svg></div><svg viewBox="0 0 24 24">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </div>
+            </div>
+            <div class="action-row ar-blue" style="margin:9px 17px" onclick="showToast('العربية (العراق)','info')">
+              <div class="ar-left">
+                <div class="ar-title">لغة التطبيق</div>
+                <div class="ar-sub">العربية (العراق)</div>
+              </div>
+              <div class="ar-right">
+                <div class="ar-icon"><svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <path
+                      d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  </svg></div><svg viewBox="0 0 24 24">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </div>
+            </div>
+            <div class="rate-display">
+              <div>
+                <div class="rate-lbl">سعر الصرف (دولار → دينار)</div>
+                <div class="rate-val num" id="rateDisplay">1 USD = 1,310 IQD</div>
+              </div><button class="rate-edit-btn" onclick="openRateModal()">تعديل</button>
+            </div>
+          </div>
+          <!-- Backup -->
+          <div class="settings-group">
+            <div class="sg-hdr">
+              <div class="sg-title">النسخ الاحتياطي</div>
+              <div class="sg-ico ic-teal"><svg viewBox="0 0 24 24">
+                  <polyline points="23 4 23 10 17 10" />
+                  <polyline points="1 20 1 14 7 14" />
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                </svg></div>
+            </div>
+            <div class="action-row ar-teal" style="margin:9px 17px" onclick="exportBackup()">
+              <div class="ar-left">
+                <div class="ar-title">نسخ احتياطي داخلي</div>
+                <div class="ar-sub">تصدير ملف JSON على جهازك</div>
+              </div>
+              <div class="ar-right">
+                <div class="ar-icon"><svg viewBox="0 0 24 24">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                    <polyline points="17 21 17 13 7 13 7 21" />
+                    <polyline points="7 3 7 8 15 8" />
+                  </svg></div><svg viewBox="0 0 24 24">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </div>
+            </div>
+            <div class="action-row ar-purple" style="margin:9px 17px" onclick="importBackup()">
+              <div class="ar-left">
+                <div class="ar-title">استعادة من ملف</div>
+                <div class="ar-sub">استيراد ملف JSON محفوظ</div>
+              </div>
+              <div class="ar-right">
+                <div class="ar-icon"><svg viewBox="0 0 24 24">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                  </svg></div><svg viewBox="0 0 24 24">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </div>
+            </div>
+            <div class="action-row ar-red" style="margin:9px 17px" onclick="clearAllData()">
+              <div class="ar-left">
+                <div class="ar-title">مسح جميع البيانات</div>
+                <div class="ar-sub">حذف نهائي لا يمكن التراجع عنه</div>
+              </div>
+              <div class="ar-right">
+                <div class="ar-icon"><svg viewBox="0 0 24 24">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                  </svg></div><svg viewBox="0 0 24 24">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <!-- Notifications -->
+          <div class="settings-group">
+            <div class="sg-hdr">
+              <div class="sg-title">الإشعارات</div>
+              <div class="sg-ico ic-amber"><svg viewBox="0 0 24 24">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg></div>
+            </div>
+            <div class="toggle-row">
+              <div class="sr-icon ic-blue" style="flex-shrink:0"><svg viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg></div>
+              <div class="sr-info">
+                <div class="sr-title">تذكير يومي</div>
+                <div class="sr-sub">8:00 م — تذكير يومي</div>
+              </div>
+              <div class="tw" id="tw-daily" onclick="toggleTw(this)">
+                <div class="tw-knob"></div>
+              </div>
+            </div>
+          </div>
+          <div style="height:28px"></div>
+        </div>
+
+
+        <!-- ══ SAVINGS CALCULATOR ══ -->
+        <div class="screen" id="screen-savings">
+          <div class="scr-header-alt">
+            <div class="scr-title">حاسبة الادخار</div>
+            <div
+              style="font-size:11px;color:var(--teal);font-weight:600;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);padding:4px 10px;border-radius:20px">
+              ذكية</div>
+          </div>
+
+          <!-- نتيجة الحساب -->
+          <div id="savCalcResult"
+            style="margin:0 16px 14px;background:linear-gradient(135deg,#0d2347,#0a3060);border:1px solid rgba(45,212,191,.2);border-radius:20px;padding:20px;display:none">
+            <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:4px">تحتاج تدخر شهرياً</div>
+            <div
+              style="font-size:38px;font-weight:900;color:var(--teal);font-family:var(--font-num);letter-spacing:-1.5px"
+              id="savMonthly">0</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">دينار عراقي</div>
+            <div
+              style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)">
+              <div style="text-align:center">
+                <div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:3px">المدة</div>
+                <div style="font-size:14px;font-weight:800;color:#fff;font-family:var(--font-num)" id="savMonths">0
+                </div>
+                <div style="font-size:10px;color:rgba(255,255,255,.4)">شهر</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:3px">المتبقي</div>
+                <div style="font-size:14px;font-weight:800;color:var(--amber);font-family:var(--font-num)"
+                  id="savRemain">0</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.4)">دينار</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:3px">نسبة الدخل</div>
+                <div style="font-size:14px;font-weight:800;font-family:var(--font-num)" id="savPct"
+                  style="color:var(--green)">0%</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.4)">من راتبك</div>
+              </div>
+            </div>
+            <!-- شريط تقدم -->
+            <div style="margin-top:14px">
+              <div
+                style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.5);margin-bottom:5px">
+                <span>التقدم الحالي</span>
+                <span id="savProgressPct">0%</span>
+              </div>
+              <div style="height:6px;background:rgba(255,255,255,.1);border-radius:3px">
+                <div id="savProgressBar"
+                  style="height:100%;border-radius:3px;background:linear-gradient(90deg,var(--teal3),var(--teal));transition:width 1s ease;width:0%">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- الإدخال -->
+          <div style="padding:0 16px;display:flex;flex-direction:column;gap:11px">
+            <div class="form-group" style="margin:0">
+              <label class="form-lbl">الهدف المالي</label>
+              <select class="form-input" id="savGoalSelect" onchange="onSavGoalChange()">
+                <option value="">— اختر هدفاً موجوداً —</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;color:var(--text3);font-size:12px;font-weight:600">
+              <div style="flex:1;height:1px;background:var(--border)"></div>أو<div
+                style="flex:1;height:1px;background:var(--border)"></div>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-lbl">المبلغ المستهدف (يدوي)</label>
+              <div class="amt-wrap"><span class="amt-cur">د.ع</span><input type="number" class="form-input"
+                  id="savTarget" placeholder="0" inputmode="decimal" oninput="calcSavings()"></div>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-lbl">المبلغ الحالي المدخر</label>
+              <div class="amt-wrap"><span class="amt-cur">د.ع</span><input type="number" class="form-input"
+                  id="savCurrent" placeholder="0" inputmode="decimal" oninput="calcSavings()"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="margin:0">
+                <label class="form-lbl">تاريخ الهدف</label>
+                <input type="date" class="form-input" id="savDate" oninput="calcSavings()">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label class="form-lbl">دخلك الشهري</label>
+                <div class="amt-wrap"><span class="amt-cur">د.ع</span><input type="number" class="form-input"
+                    id="savIncome" placeholder="0" inputmode="decimal" oninput="calcSavings()"></div>
+              </div>
+            </div>
+            <button onclick="calcSavings()"
+              style="width:100%;padding:13px;background:linear-gradient(135deg,var(--teal3),var(--teal));border:none;border-radius:12px;color:#041420;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:800;cursor:pointer">
+              احسب الآن
+            </button>
+            <!-- نصائح -->
+            <div id="savTips"
+              style="display:none;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px">
+              <div
+                style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:9px;display:flex;align-items:center;gap:6px">
+                <svg
+                  style="width:14px;height:14px;stroke:var(--amber);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+                  viewBox="0 0 24 24">
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+                نصائح للوصول للهدف
+              </div>
+              <div id="savTipsList" style="font-size:12px;color:var(--text2);line-height:1.8"></div>
+            </div>
+          </div>
+          <div class="h-20"></div>
+        </div>
+
+        <!-- ══ RECURRING EXPENSES ══ -->
+        <div class="screen" id="screen-recurring">
+          <div class="scr-header-alt">
+            <div class="scr-title">المصاريف المتكررة</div>
+            <button onclick="openRecurringModal()"
+              style="display:flex;align-items:center;gap:5px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);border-radius:10px;padding:7px 13px;font-size:12.5px;font-weight:700;color:var(--blue);cursor:pointer;font-family:inherit">
+              <svg
+                style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"
+                viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              جديد
+            </button>
+          </div>
+          <!-- إجمالي شهري -->
+          <div
+            style="margin:0 16px 13px;background:linear-gradient(135deg,rgba(96,165,250,.15),rgba(96,165,250,.06));border:1px solid rgba(96,165,250,.25);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:4px">إجمالي شهري تلقائي</div>
+              <div style="font-size:22px;font-weight:900;color:var(--blue);font-family:var(--font-num)" id="recurTotal">
+                0 د.ع</div>
+            </div>
+            <div
+              style="width:44px;height:44px;border-radius:12px;background:rgba(96,165,250,.15);display:flex;align-items:center;justify-content:center">
+              <svg
+                style="width:20px;height:20px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+                viewBox="0 0 24 24">
+                <polyline points="17 1 21 5 17 9" />
+                <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                <polyline points="7 23 3 19 7 15" />
+                <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+              </svg>
+            </div>
+          </div>
+          <div id="recurList" class="px-16"></div>
+          <div class="h-20"></div>
+        </div>
+
+        <!-- ══ MONTH COMPARE ══ -->
+        <div class="screen" id="screen-compare">
+          <div style="padding:14px 16px 8px">
+            <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:12px">مقارنة الأشهر</div>
+            <div style="display:flex;gap:9px;margin-bottom:14px">
+              <div style="flex:1">
+                <label class="form-lbl">الشهر الأول</label>
+                <input type="month" class="form-input" id="cmpMonth1" onchange="renderCompare()">
+              </div>
+              <div style="flex:1">
+                <label class="form-lbl">الشهر الثاني</label>
+                <input type="month" class="form-input" id="cmpMonth2" onchange="renderCompare()">
+              </div>
+            </div>
+          </div>
+          <div id="compareContent" class="px-16"></div>
+          <div class="h-20"></div>
+        </div>
+
+        <!-- ══ ADMIN PANEL ══ -->
+        <div class="screen" id="screen-admin">
+          <div class="scr-header-alt">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div
+                style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,rgba(244,63,94,.2),rgba(244,63,94,.1));display:flex;align-items:center;justify-content:center">
+                <svg
+                  style="width:16px;height:16px;stroke:var(--red);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+                  viewBox="0 0 24 24">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+              <div class="scr-title">لوحة الإدارة</div>
+            </div>
+            <div
+              style="font-size:11px;color:var(--red);font-weight:700;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.2);padding:4px 10px;border-radius:20px">
+              Admin Only</div>
+          </div>
+
+          <!-- Stats Row -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:0 16px 14px">
+            <div
+              style="background:linear-gradient(135deg,rgba(45,212,191,.15),rgba(45,212,191,.06));border:1px solid rgba(45,212,191,.25);border-radius:14px;padding:13px 10px;text-align:center">
+              <div style="font-size:22px;font-weight:900;color:var(--teal)" id="adminUserCount">—</div>
+              <div style="font-size:10.5px;color:var(--text2);font-weight:600;margin-top:3px">مستخدم</div>
+            </div>
+            <div
+              style="background:linear-gradient(135deg,rgba(96,165,250,.15),rgba(96,165,250,.06));border:1px solid rgba(96,165,250,.25);border-radius:14px;padding:13px 10px;text-align:center">
+              <div style="font-size:22px;font-weight:900;color:var(--blue)" id="adminTxCount">—</div>
+              <div style="font-size:10.5px;color:var(--text2);font-weight:600;margin-top:3px">عملية كلية</div>
+            </div>
+            <div
+              style="background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(34,197,94,.06));border:1px solid rgba(34,197,94,.25);border-radius:14px;padding:13px 10px;text-align:center">
+              <div style="font-size:22px;font-weight:900;color:var(--green)" id="adminActiveCount">—</div>
+              <div style="font-size:10.5px;color:var(--text2);font-weight:600;margin-top:3px">نشط اليوم</div>
+            </div>
+          </div>
+
+          <!-- Refresh -->
+          <div style="padding:0 16px 10px">
+            <button onclick="loadAdminData()"
+              style="width:100%;padding:11px;background:linear-gradient(135deg,var(--teal3),var(--teal));border:none;border-radius:12px;color:#041420;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px">
+              <svg
+                style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"
+                viewBox="0 0 24 24">
+                <polyline points="23 4 23 10 17 10" />
+                <polyline points="1 20 1 14 7 14" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </svg>
+              تحديث البيانات
+            </button>
+          </div>
+
+          <!-- Users List -->
+          <div
+            style="padding:0 16px 6px;font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:8px">
+            المستخدمون
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+          </div>
+          <div id="adminUsersList" class="px-16"></div>
+          <div class="h-20"></div>
+        </div>
+
+      </div><!-- /scroll-wrap -->
+
+      <!-- FABs -->
+      <button class="fab fab-red hidden" id="fabExp" onclick="openTxModal('expense')"><svg viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg></button>
+      <button class="fab fab-green hidden" id="fabInc" onclick="openTxModal('income')"><svg viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg></button>
+      <button class="fab fab-teal hidden" id="fabGoal" onclick="openGoalModal()"><svg viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg></button>
+      <button class="fab fab-amber hidden" id="fabDebt" onclick="openDebtModal()"><svg viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg></button>
+      <button class="fab fab-teal hidden" id="fabSub" onclick="openSubModal()"><svg viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg></button>
+      <button class="fab fab-teal hidden" id="fabBill" onclick="openBillModal()"><svg viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg></button>
+      <button class="fab fab-blue hidden" id="fabRecur" onclick="openRecurringModal()"><svg viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg></button>
+      <button class="fab fab-amber hidden" id="fabBudget" onclick="openBudgetModal(null)"><svg viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg></button>
+
+      <!-- BOTTOM NAV -->
+      <nav class="bottom-nav">
+        <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
+          <div class="nav-ind"></div><svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>الإعدادات
+        </button>
+        <button class="nav-btn" id="nav-analytics" onclick="switchTab('analytics')">
+          <div class="nav-ind"></div><svg viewBox="0 0 24 24">
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>التحليلات
+        </button>
+        <button class="nav-btn" id="nav-income" onclick="switchTab('income')">
+          <div class="nav-ind"></div><svg viewBox="0 0 24 24">
+            <rect x="2" y="7" width="20" height="14" rx="2" />
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+          </svg>الدخل
+        </button>
+        <button class="nav-btn" id="nav-expenses" onclick="switchTab('expenses')">
+          <div class="nav-ind"></div><svg viewBox="0 0 24 24">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>المصاريف
+        </button>
+        <button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
+          <div class="nav-ind"></div><svg viewBox="0 0 24 24">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>الرئيسية
+        </button>
+      </nav>
+    </div><!-- /app -->
+  </div><!-- /mainApp -->
+  </div><!-- /desktop-wrapper -->
+
+
+  <!-- ══ MODAL: RECURRING ══ -->
+  <div class="modal-overlay" id="recurringModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">مصروف متكرر جديد</div>
+      <div class="form-group">
+        <label class="form-lbl">اسم المصروف</label>
+        <input type="text" class="form-input" id="recurName" placeholder="إيجار، راتب، قسط...">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-lbl">المبلغ</label>
+          <div class="amt-wrap"><span class="amt-cur">د.ع</span><input type="number" class="form-input" id="recurAmt"
+              placeholder="0" inputmode="decimal"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-lbl">التكرار</label>
+          <select class="form-input" id="recurFreq">
+            <option value="monthly">شهري</option>
+            <option value="weekly">أسبوعي</option>
+            <option value="yearly">سنوي</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-lbl">الفئة</label>
+        <select class="form-input" id="recurCat">
+          <option value="فواتير">فواتير</option>
+          <option value="إيجار">إيجار</option>
+          <option value="راتب">راتب</option>
+          <option value="طعام">طعام</option>
+          <option value="مواصلات">مواصلات</option>
+          <option value="تعليم">تعليم</option>
+          <option value="صحة">صحة</option>
+          <option value="سلفة">سلفة</option>
+          <option value="أخرى">أخرى</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-lbl">يوم التكرار (من الشهر)</label>
+        <input type="number" class="form-input" id="recurDay" placeholder="1" min="1" max="31" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-lbl">تاريخ البداية</label>
+        <input type="date" class="form-input" id="recurStart">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeMod('recurringModal')">إلغاء</button>
+        <button class="btn-save blue" onclick="saveRecurring()">حفظ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: TX ══ -->
+  <div class="modal-overlay" id="txModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="txModalTitle">إضافة مصروف</div>
+      <div class="type-row"><button class="type-pill t-exp" id="tpExp" onclick="switchTxType('expense')">↓
+          مصروف</button><button class="type-pill" id="tpInc" onclick="switchTxType('income')">↑ دخل</button></div>
+      <div class="form-group"><label class="form-lbl">المبلغ</label>
+        <div class="amt-wrap"><span class="amt-cur" id="txCurLabel">د.ع</span><input type="number" class="form-input"
+            id="txAmt" placeholder="0" inputmode="decimal"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-lbl">الوصف</label><input type="text" class="form-input" id="txName"
+            placeholder="اسم العملية"></div>
+        <div class="form-group"><label class="form-lbl" id="txCatLabel">الفئة (المصدر)</label>
+          <select class="form-input" id="txCat">
+            <option value="طعام">طعام</option>
+            <option value="مواصلات">مواصلات</option>
+            <option value="تسوق">تسوق</option>
+            <option value="فواتير">فواتير</option>
+            <option value="صحة">صحة</option>
+            <option value="ترفيه">ترفيه</option>
+            <option value="تعليم">تعليم</option>
+            <option value="سلفة">سلفة / دين</option>
+            <option value="أخرى">أخرى</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-lbl">العملة</label>
+        <div class="chips-row" id="txCurrencyChips">
+          <button class="chip-btn active" onclick="selectTxCurrency('IQD',this)">د.ع (IQD)</button>
+          <button class="chip-btn" onclick="selectTxCurrency('USD',this)">$ (USD)</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-lbl">التاريخ</label><input type="date" class="form-input"
+            id="txDate"></div>
+        <div class="form-group"><label class="form-lbl">ملاحظة</label><input type="text" class="form-input" id="txNote"
+            placeholder="اختياري"></div>
+      </div>
+      <div class="modal-actions"><button class="btn-cancel" onclick="closeMod('txModal')">إلغاء</button><button
+          class="btn-save exp" id="txSaveBtn" onclick="saveTx()">حفظ المصروف</button></div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: GOAL ══ -->
+  <div class="modal-overlay" id="goalModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">هدف مالي جديد</div>
+      <div class="form-group"><label class="form-lbl">نوع الهدف</label>
+        <div class="icon-picker" id="goalIconPicker"></div>
+      </div>
+      <div class="form-group"><label class="form-lbl">عنوان الهدف</label><input type="text" class="form-input"
+          id="goalName" placeholder="مثال: شراء سيارة"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-lbl">المبلغ المستهدف</label>
+          <div class="amt-wrap"><span class="amt-cur" id="goalCurLbl">د.ع</span><input type="number" class="form-input"
+              id="goalTarget" placeholder="0" inputmode="decimal"></div>
+        </div>
+        <div class="form-group"><label class="form-lbl">المبلغ الحالي</label>
+          <div class="amt-wrap"><span class="amt-cur" id="goalCurLbl2">د.ع</span><input type="number" class="form-input"
+              id="goalCurrent" placeholder="0" inputmode="decimal"></div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-lbl">العملة</label>
+        <div class="chips-row" id="goalCurrencyChips">
+          <button class="chip-btn active" onclick="selectGoalCurrency('IQD',this)">د.ع (IQD)</button>
+          <button class="chip-btn" onclick="selectGoalCurrency('USD',this)">$ (USD)</button>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-lbl">تاريخ الهدف</label><input type="date" class="form-input"
+          id="goalDate"></div>
+      <div class="modal-actions"><button class="btn-cancel" onclick="closeMod('goalModal')">إلغاء</button><button
+          class="btn-save teal" onclick="saveGoal()">حفظ الهدف</button></div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: DEBT ══ -->
+  <div class="modal-overlay" id="debtModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">إضافة دين</div>
+      <div class="form-group"><label class="form-lbl">نوع الدين</label>
+        <div class="type-row"><button class="type-pill t-lend" id="dpLend" onclick="switchDebtDir('lend')">← دين
+            لي</button><button class="type-pill" id="dpBorrow" onclick="switchDebtDir('borrow')">→ دين عليّ</button>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-lbl">نوع الالتزام</label>
+        <div class="chips-row" id="debtTypeChips">
+          <button class="chip-btn active" onclick="selectDebtType('دين',this)">دين</button>
+          <button class="chip-btn" onclick="selectDebtType('سلفة',this)">سلفة</button>
+          <button class="chip-btn" onclick="selectDebtType('أقساط',this)">أقساط</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-lbl">المبلغ الإجمالي</label>
+          <div class="amt-wrap"><span class="amt-cur">د.ع</span><input type="number" class="form-input" id="debtAmt"
+              placeholder="0" inputmode="decimal"></div>
+        </div>
+        <div class="form-group"><label class="form-lbl" id="debtPersonLabel">اسم الدائن</label><input type="text"
+            class="form-input" id="debtPerson" placeholder="اسم الشخص"></div>
+      </div>
+      <div class="form-group"><label class="form-lbl">تاريخ الاستحقاق</label><input type="date" class="form-input"
+          id="debtDue"></div>
+      <!-- installment toggle -->
+      <div class="toggle-row" style="padding:10px 0;border-bottom:none;margin-bottom:8px">
+        <div class="sr-info">
+          <div class="sr-title" style="font-size:13px">تقسيط السداد</div>
+          <div class="sr-sub">توزيع المبلغ على دفعات</div>
+        </div>
+        <div class="tw" id="tw-install" onclick="toggleInstall()">
+          <div class="tw-knob"></div>
+        </div>
+      </div>
+      <div class="install-section" id="installSection">
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0"><label class="form-lbl">عدد الأقساط</label><input
+              type="number" class="form-input" id="installCount" placeholder="12" inputmode="numeric" min="1"></div>
+          <div class="form-group" style="margin-bottom:0"><label class="form-lbl">قسط واحد</label>
+            <div class="amt-wrap"><span class="amt-cur">د.ع</span><input type="number" class="form-input"
+                id="installAmt" placeholder="0" inputmode="decimal"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:10px"><label class="form-lbl">ملاحظات (اختياري)</label><textarea
+          class="form-input" id="debtNote" rows="2" placeholder="أي تفاصيل إضافية..."
+          style="resize:none;min-height:60px"></textarea></div>
+      <div class="modal-actions"><button class="btn-cancel" onclick="closeMod('debtModal')">إلغاء</button><button
+          class="btn-save amber" onclick="saveDebt()">حفظ الدين</button></div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: SUBSCRIPTION ══ -->
+  <div class="modal-overlay" id="subModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">اشتراك جديد</div>
+      <div class="form-group"><label class="form-lbl">اسم الاشتراك</label><input type="text" class="form-input"
+          id="subName" placeholder="Netflix، Spotify..."></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-lbl">المبلغ</label>
+          <div class="amt-wrap"><span class="amt-cur">د.ع</span><input type="number" class="form-input" id="subAmt"
+              placeholder="0" inputmode="decimal"></div>
+        </div>
+        <div class="form-group"><label class="form-lbl">التكرار</label><select class="form-input" id="subFreq">
+            <option value="monthly">شهري</option>
+            <option value="yearly">سنوي</option>
+            <option value="weekly">أسبوعي</option>
+          </select></div>
+      </div>
+      <div class="form-group"><label class="form-lbl">الفئة</label>
+        <div class="chips-row" id="subCatChips">
+          <button class="chip-btn active" onclick="selectChip(this,'subCatChips','ترفيه')">ترفيه</button>
+          <button class="chip-btn" onclick="selectChip(this,'subCatChips','برمجيات')">برمجيات</button>
+          <button class="chip-btn" onclick="selectChip(this,'subCatChips','تعليم')">تعليم</button>
+          <button class="chip-btn" onclick="selectChip(this,'subCatChips','لياقة')">لياقة</button>
+          <button class="chip-btn" onclick="selectChip(this,'subCatChips','أخرى')">أخرى</button>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-lbl">تاريخ التجديد القادم</label><input type="date" class="form-input"
+          id="subNextDate"></div>
+      <div class="modal-actions"><button class="btn-cancel" onclick="closeMod('subModal')">إلغاء</button><button
+          class="btn-save teal" onclick="saveSub()">حفظ الاشتراك</button></div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: BILL ══ -->
+  <div class="modal-overlay" id="billModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">فاتورة جديدة</div>
+      <div class="form-group"><label class="form-lbl">اسم الفاتورة</label><input type="text" class="form-input"
+          id="billName" placeholder="كهرباء، ماء، إنترنت..."></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-lbl">المبلغ</label>
+          <div class="amt-wrap"><span class="amt-cur">د.ع</span><input type="number" class="form-input" id="billAmt"
+              placeholder="0" inputmode="decimal"></div>
+        </div>
+        <div class="form-group"><label class="form-lbl">تاريخ الاستحقاق</label><input type="date" class="form-input"
+            id="billDue"></div>
+      </div>
+      <div class="form-group"><label class="form-lbl">الفئة</label>
+        <div class="chips-row" id="billCatChips">
+          <button class="chip-btn active" onclick="selectChip(this,'billCatChips','كهرباء')">كهرباء</button>
+          <button class="chip-btn" onclick="selectChip(this,'billCatChips','ماء')">ماء</button>
+          <button class="chip-btn" onclick="selectChip(this,'billCatChips','إنترنت')">إنترنت</button>
+          <button class="chip-btn" onclick="selectChip(this,'billCatChips','هاتف')">هاتف</button>
+          <button class="chip-btn" onclick="selectChip(this,'billCatChips','إيجار')">إيجار</button>
+          <button class="chip-btn" onclick="selectChip(this,'billCatChips','أخرى')">أخرى</button>
+        </div>
+      </div>
+      <div class="modal-actions"><button class="btn-cancel" onclick="closeMod('billModal')">إلغاء</button><button
+          class="btn-save blue" onclick="saveBill()">حفظ الفاتورة</button></div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: EXCHANGE RATE ══ -->
+  <div class="modal-overlay" id="rateModal">
+    <div class="modal-sheet modal-small">
+      <div class="modal-handle"></div>
+      <div class="modal-title">تعديل سعر الصرف</div>
+      <div class="form-group"><label class="form-lbl">1 دولار يساوي (دينار عراقي)</label>
+        <div class="amt-wrap"><span class="amt-cur" style="left:13px;font-size:11px">IQD</span><input type="number"
+            class="form-input" id="rateInput" placeholder="1310" inputmode="decimal" style="padding-left:52px"></div>
+      </div>
+      <div
+        style="font-size:12px;color:var(--text2);background:var(--card2);border-radius:10px;padding:10px 13px;margin-bottom:14px">
+        السعر الرسمي الحالي للبنك المركزي العراقي: <strong style="color:var(--teal)">1,310 IQD</strong></div>
+      <div class="modal-actions"><button class="btn-cancel" onclick="closeMod('rateModal')">إلغاء</button><button
+          class="btn-save teal" onclick="saveRate()">حفظ</button></div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: DEBT DETAIL ══ -->
+  <div class="modal-overlay" id="debtDetailModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="modal-title" id="ddTitle" style="margin-bottom:0">تفاصيل الدين</div>
+        <div style="display:flex;gap:7px">
+          <button onclick="openEditDebtModal()"
+            style="display:flex;align-items:center;gap:4px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);border-radius:9px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;font-family:inherit;transition:var(--tr)"><svg
+              style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+              viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>تعديل</button>
+          <button onclick="confirmDeleteDebt()"
+            style="display:flex;align-items:center;gap:4px;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);border-radius:9px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--red);cursor:pointer;font-family:inherit;transition:var(--tr)"><svg
+              style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+              viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+            </svg>حذف</button>
+        </div>
+      </div>
+      <!-- big progress -->
+      <div id="ddProgressSection">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <div style="font-size:12px;color:var(--text2);font-weight:600">نسبة السداد</div>
+          <div style="font-size:13px;font-weight:800" id="ddPct">0%</div>
+        </div>
+        <div class="big-progress-bar">
+          <div class="big-progress-fill" id="ddProgressFill" style="width:0%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3)"><span>0</span><span
+            id="ddProgressLbls"></span></div>
+      </div>
+      <!-- details -->
+      <div class="detail-section" id="ddDetails"></div>
+      <!-- partial payment -->
+      <div id="ddPaySection">
+        <div
+          style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <svg
+            style="width:15px;height:15px;stroke:var(--teal);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+            viewBox="0 0 24 24">
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          تسديد جزئي
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0"><label class="form-lbl">المبلغ المسدّد</label>
+            <div class="amt-wrap"><span class="amt-cur">د.ع</span><input type="number" class="form-input"
+                id="partialAmt" placeholder="0" inputmode="decimal"></div>
+          </div>
+          <div class="form-group" style="margin-bottom:0"><label class="form-lbl">تاريخ السداد</label><input type="date"
+              class="form-input" id="partialDate"></div>
+        </div>
+        <button onclick="addPartialPayment()"
+          style="width:100%;margin-top:10px;padding:12px;background:linear-gradient(135deg,var(--teal3),var(--teal));border:none;border-radius:11px;color:#041420;font-family:'Tajawal',sans-serif;font-size:13.5px;font-weight:800;cursor:pointer;transition:var(--tr)">تسجيل
+          الدفعة</button>
+      </div>
+      <!-- payment history -->
+      <div class="detail-section" id="ddHistory" style="margin-top:13px">
+        <div class="detail-section-title">سجل الدفعات</div>
+        <div id="ddHistoryList"></div>
+      </div>
+      <div style="margin-top:10px"><button class="btn-cancel" style="width:100%"
+          onclick="closeMod('debtDetailModal')">إغلاق</button></div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: EDIT DEBT ══ -->
+  <div class="modal-overlay" id="editDebtModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">تعديل الدين</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-lbl">المبلغ الإجمالي</label>
+          <div class="amt-wrap"><span class="amt-cur">د.ع</span><input type="number" class="form-input" id="editDebtAmt"
+              placeholder="0" inputmode="decimal"></div>
+        </div>
+        <div class="form-group"><label class="form-lbl" id="editDebtPersonLbl">اسم الشخص</label><input type="text"
+            class="form-input" id="editDebtPerson" placeholder="اسم الشخص"></div>
+      </div>
+      <div class="form-group"><label class="form-lbl">تاريخ الاستحقاق</label><input type="date" class="form-input"
+          id="editDebtDue"></div>
+      <div class="form-group"><label class="form-lbl">ملاحظات</label><textarea class="form-input" id="editDebtNote"
+          rows="2" placeholder="ملاحظات..." style="resize:none;min-height:55px"></textarea></div>
+      <div class="modal-actions"><button class="btn-cancel" onclick="closeMod('editDebtModal')">إلغاء</button><button
+          class="btn-save teal" onclick="saveEditDebt()">حفظ التعديل</button></div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: BUDGET ══ -->
+  <div class="modal-overlay" id="budgetModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="budgetModalTitle">ميزانية فئة جديدة</div>
+      <div class="form-group"><label class="form-lbl">الفئة</label>
+        <select class="form-input" id="budgetCat">
+          <option value="طعام">طعام</option>
+          <option value="مواصلات">مواصلات</option>
+          <option value="تسوق">تسوق</option>
+          <option value="فواتير">فواتير</option>
+          <option value="صحة">صحة</option>
+          <option value="ترفيه">ترفيه</option>
+          <option value="تعليم">تعليم</option>
+          <option value="أخرى">أخرى</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-lbl">الحد الشهري المسموح</label>
+        <div class="amt-wrap"><span class="amt-cur">د.ع</span><input type="number" class="form-input" id="budgetLimit"
+            placeholder="0" inputmode="decimal"></div>
+      </div>
+      <div
+        style="background:var(--card2);border:1px solid var(--border);border-radius:11px;padding:12px;font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:13px">
+        💡 سيتم حساب المصروف الفعلي تلقائياً من عملياتك المسجلة في نفس الفئة هذا الشهر.
+      </div>
+      <div class="modal-actions"><button class="btn-cancel" onclick="closeMod('budgetModal')">إلغاء</button><button
+          class="btn-save amber" id="budgetSaveBtn" onclick="saveBudget()">حفظ الميزانية</button></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // JS_PLACEHOLDER
+  </script>
+</body>
+
+</html>
