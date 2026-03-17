@@ -2468,7 +2468,7 @@ async function doGoogleLogin(){
     const {error} = await sbClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: location.origin + location.pathname,
+        redirectTo: 'https://amwali.vercel.app',
         queryParams: { access_type:'offline', prompt:'consent' }
       }
     });
@@ -2487,7 +2487,7 @@ async function doForgotPassword(){
   if(!email){ showAuthError('أدخل بريدك الإلكتروني أولاً'); return; }
   try{
     const {error} = await sbClient.auth.resetPasswordForEmail(email, {
-      redirectTo: location.origin + location.pathname
+      redirectTo: 'https://amwali.vercel.app'
     });
     if(error) throw error;
     showAuthMsg('✉️ تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك', 'success');
