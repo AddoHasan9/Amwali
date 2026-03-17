@@ -965,56 +965,50 @@ html.light .toast{background:rgba(240,246,255,.95)}
 @media (min-width: 1024px) {
   body {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     min-height: 100vh;
     background: var(--bg);
   }
-  body::before {
-    background:
-      radial-gradient(ellipse at 15% 50%, rgba(45,212,191,.05) 0%, transparent 55%),
-      radial-gradient(ellipse at 85% 30%, rgba(96,165,250,.04) 0%, transparent 55%),
-      radial-gradient(ellipse at 50% 80%, rgba(167,139,250,.03) 0%, transparent 55%);
-  }
 
-  /* Wrapper للتخطيط الجانبي */
+  /* الـ wrapper مجرد flex row */
   .desktop-wrapper {
     display: flex;
-    gap: 24px;
     align-items: flex-start;
     justify-content: center;
+    gap: 24px;
     width: 100%;
-    max-width: 1100px;
+    max-width: 1140px;
     padding: 20px;
     box-sizing: border-box;
-    margin: 0 auto;
     position: relative;
     z-index: 1;
   }
 
-  /* التطبيق على اليمين */
-  .app {
-    max-width: 420px;
-    width: 420px;
+  /* التطبيق — يظهر دايماً على اليمين */
+  #mainApp {
+    max-width: 420px !important;
+    width: 420px !important;
     flex-shrink: 0;
-    height: calc(100vh - 40px);
-    height: calc(100dvh - 40px);
-    margin: 0;
-    border-radius: 32px;
-    border: 1px solid var(--border);
-    box-shadow: 0 40px 100px rgba(0,0,0,.4);
-    position: sticky;
+    height: calc(100dvh - 40px) !important;
+    margin: 0 !important;
+    border-radius: 32px !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 40px 100px rgba(0,0,0,.4) !important;
+    position: sticky !important;
     top: 20px;
+    order: 2;
   }
 
   /* لوحة المعلومات على اليسار */
-  .desktop-panel {
+  #desktopPanel {
     flex: 1;
     min-width: 0;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     gap: 16px;
     padding-top: 4px;
+    order: 1;
   }
 
   /* بطاقات اللوحة */
@@ -1109,11 +1103,10 @@ html.light .toast{background:rgba(240,246,255,.95)}
 /* ══ GUARANTEE APP VISIBILITY ══ */
 #mainApp {
   display: flex !important;
-  flex-direction: column;
+  flex-direction: column !important;
+  flex-shrink: 0;
 }
-/* موبايل: الـ wrapper يكون block بسيط */
 #desktopWrapper {
-  display: block;
   width: 100%;
 }
 #desktopPanel {
@@ -3121,14 +3114,27 @@ async function syncFromCloud(){
     if(error && error.code !== 'PGRST116') throw error; // PGRST116 = not found
     if(data && data.data){
       const d = data.data;
-      txList   = d.txList   || [];
-      goals    = d.goals    || [];
-      debts    = d.debts    || [];
-      budgets  = d.budgets  || [];
-      subs     = d.subs     || [];
-      bills    = d.bills    || [];
-      if(d.exchangeRate) exchangeRate = d.exchangeRate;
-      saveState(); // update localStorage cache
+      // قارن التواريخ — استخدم الأحدث
+      const cloudTime = data.updated_at ? new Date(data.updated_at).getTime() : 0;
+      const localRaw  = localStorage.getItem(STORE_KEY+'_ts');
+      const localTime = localRaw ? parseInt(localRaw) : 0;
+      if(cloudTime >= localTime){
+        // السحابة أحدث — استخدمها
+        txList   = d.txList   || [];
+        goals    = d.goals    || [];
+        debts    = d.debts    || [];
+        budgets  = d.budgets  || [];
+        subs     = d.subs     || [];
+        bills    = d.bills    || [];
+        if(d.exchangeRate) exchangeRate = d.exchangeRate;
+        localStorage.setItem(STORE_KEY, JSON.stringify({txList,goals,debts,budgets,subs,bills}));
+        localStorage.setItem(STORE_KEY+'_ts', cloudTime.toString());
+      } else {
+        // المحلي أحدث — ارفعه للسحابة
+        console.log('Local data is newer, pushing to cloud');
+        syncToCloud();
+        return;
+      }
       lastSyncAt = new Date(data.updated_at || Date.now());
       // re-render active screen
       const renders={home:renderHome,expenses:renderExpenses,income:renderIncome,kanban:renderKanban,goals:renderGoals,debts:renderDebts,subscriptions:renderSubs,bills:renderBills,analytics:renderAnalytics,budget:renderBudget,admin:loadAdminData};
@@ -3197,11 +3203,22 @@ function updateProfileModal(){
   if(lastSync) lastSync.textContent = lastSyncAt ? 'آخر مزامنة: ' + lastSyncAt.toLocaleTimeString('ar-IQ') : 'لم تتم المزامنة بعد';
 }
 
-/* override saveState to also sync */
+/* ══ saveState الموحّد ══ */
 const _origSaveState = saveState;
 function saveState(){
-  _origSaveState();
-  if(currentUser) syncToCloud();
+  // 1. حفظ محلي فوري
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify({txList,goals,debts,budgets,subs,bills}));
+    localStorage.setItem(STORE_KEY+'_ts', Date.now().toString());
+    showSaveIndicator();
+  } catch(e){ console.warn('Local save failed',e) }
+  // 2. رفع للسحابة
+  if(currentUser){
+    // إعادة تعيين syncInProgress إذا كانت عالقة
+    syncInProgress = false;
+    syncToCloud();
+  }
+  // 3. تحديث الديسكتوب
   updateDesktopPanel();
 }
 let pwaPrompt=null;
@@ -3392,41 +3409,33 @@ function isDesktop(){ return window.innerWidth >= 1024 }
 function isTablet(){ return window.innerWidth >= 768 }
 
 function setupResponsive(){
-  const panel = document.getElementById('desktopPanel');
+  const wrapper = document.getElementById('desktopWrapper');
+  const panel   = document.getElementById('desktopPanel');
   const mainApp = document.getElementById('mainApp');
   if(!mainApp) return;
 
+  // نقل الـ app داخل الـ wrapper إذا مو موجود فيه
+  if(wrapper && mainApp.parentElement !== wrapper){
+    wrapper.appendChild(mainApp);
+  }
+
   if(isDesktop()){
-    // الديسكتوب — أظهر اللوحة الجانبية
-    if(panel) panel.style.display = 'flex';
-    mainApp.style.maxWidth = '440px';
-    mainApp.style.width = '440px';
-    mainApp.style.height = 'calc(100dvh - 40px)';
-    mainApp.style.borderRadius = '32px';
-    mainApp.style.border = '1px solid var(--border)';
-    mainApp.style.boxShadow = '0 40px 100px rgba(0,0,0,.4)';
-    mainApp.style.margin = '20px 0';
+    if(wrapper) wrapper.style.display = 'flex';
+    if(panel)   panel.style.display   = 'flex';
     updateDesktopPanel();
-  } else if(isTablet()){
-    // تابلت
-    if(panel) panel.style.display = 'none';
-    mainApp.style.maxWidth = '480px';
-    mainApp.style.width = '';
-    mainApp.style.height = 'calc(100dvh - 40px)';
-    mainApp.style.borderRadius = '28px';
-    mainApp.style.border = '1px solid var(--border)';
-    mainApp.style.boxShadow = '0 32px 80px rgba(0,0,0,.35)';
-    mainApp.style.margin = '20px auto';
   } else {
-    // موبايل — الوضع الافتراضي
-    if(panel) panel.style.display = 'none';
-    mainApp.style.maxWidth = '430px';
-    mainApp.style.width = '';
-    mainApp.style.height = '100dvh';
+    if(wrapper) wrapper.style.display = 'block';
+    if(panel)   panel.style.display   = 'none';
+    // إعادة الـ app لوضعه الطبيعي
+    mainApp.style.maxWidth    = '';
+    mainApp.style.width       = '';
+    mainApp.style.height      = '100dvh';
     mainApp.style.borderRadius = '';
-    mainApp.style.border = '';
-    mainApp.style.boxShadow = '';
-    mainApp.style.margin = '0 auto';
+    mainApp.style.border      = '';
+    mainApp.style.boxShadow   = '';
+    mainApp.style.margin      = '0 auto';
+    mainApp.style.position    = '';
+    mainApp.style.top         = '';
   }
 }
 
