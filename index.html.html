@@ -1179,6 +1179,52 @@ html.light .toast{background:rgba(240,246,255,.95)}
   <div style="height:28px"></div>
 </div>
 
+
+<!-- ══ ADMIN PANEL ══ -->
+<div class="screen" id="screen-admin">
+  <div style="padding:14px 16px 8px;display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,rgba(244,63,94,.2),rgba(244,63,94,.1));display:flex;align-items:center;justify-content:center">
+        <svg style="width:16px;height:16px;stroke:var(--red);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div style="font-size:15px;font-weight:800;color:var(--text)">لوحة الإدارة</div>
+    </div>
+    <div style="font-size:11px;color:var(--red);font-weight:700;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.2);padding:4px 10px;border-radius:20px">Admin Only</div>
+  </div>
+
+  <!-- Stats Row -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:0 16px 14px">
+    <div style="background:linear-gradient(135deg,rgba(45,212,191,.15),rgba(45,212,191,.06));border:1px solid rgba(45,212,191,.25);border-radius:14px;padding:13px 10px;text-align:center">
+      <div style="font-size:22px;font-weight:900;color:var(--teal)" id="adminUserCount">—</div>
+      <div style="font-size:10.5px;color:var(--text2);font-weight:600;margin-top:3px">مستخدم</div>
+    </div>
+    <div style="background:linear-gradient(135deg,rgba(96,165,250,.15),rgba(96,165,250,.06));border:1px solid rgba(96,165,250,.25);border-radius:14px;padding:13px 10px;text-align:center">
+      <div style="font-size:22px;font-weight:900;color:var(--blue)" id="adminTxCount">—</div>
+      <div style="font-size:10.5px;color:var(--text2);font-weight:600;margin-top:3px">عملية كلية</div>
+    </div>
+    <div style="background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(34,197,94,.06));border:1px solid rgba(34,197,94,.25);border-radius:14px;padding:13px 10px;text-align:center">
+      <div style="font-size:22px;font-weight:900;color:var(--green)" id="adminActiveCount">—</div>
+      <div style="font-size:10.5px;color:var(--text2);font-weight:600;margin-top:3px">نشط اليوم</div>
+    </div>
+  </div>
+
+  <!-- Refresh -->
+  <div style="padding:0 16px 10px">
+    <button onclick="loadAdminData()" style="width:100%;padding:11px;background:linear-gradient(135deg,var(--teal3),var(--teal));border:none;border-radius:12px;color:#041420;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px">
+      <svg style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      تحديث البيانات
+    </button>
+  </div>
+
+  <!-- Users List -->
+  <div style="padding:0 16px 6px;font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:8px">
+    المستخدمون
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+  </div>
+  <div id="adminUsersList" style="padding:0 16px"></div>
+  <div style="height:20px"></div>
+</div>
+
 </div><!-- /scroll-wrap -->
 
 <!-- FABs -->
@@ -1658,7 +1704,7 @@ function addRipple(e){const btn=e.currentTarget,r=document.createElement('span')
 /* ════════════════════════════════
    TABS
 ════════════════════════════════ */
-const TAB_TITLES={home:'أموالي',expenses:'سجل المصاريف',income:'سجل الدخل',kanban:'لوحة المتابعة',goals:'الأهداف',debts:'الديون',subscriptions:'الاشتراكات',bills:'الفواتير',analytics:'التحليل المالي',settings:'الإعدادات',budget:'الميزانية الشهرية'};
+const TAB_TITLES={home:'أموالي',admin:'لوحة الإدارة',expenses:'سجل المصاريف',income:'سجل الدخل',kanban:'لوحة المتابعة',goals:'الأهداف',debts:'الديون',subscriptions:'الاشتراكات',bills:'الفواتير',analytics:'التحليل المالي',settings:'الإعدادات',budget:'الميزانية الشهرية'};
 const FAB_MAP={expenses:'fabExp',income:'fabInc',goals:'fabGoal',debts:'fabDebt',subscriptions:'fabSub',bills:'fabBill',budget:'fabBudget'};
 function switchTab(t){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -1669,7 +1715,7 @@ function switchTab(t){
   Object.values(FAB_MAP).forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('hidden')});
   if(FAB_MAP[t]){const fe=document.getElementById(FAB_MAP[t]);if(fe)fe.classList.remove('hidden');}
   curTab=t;document.getElementById('scrollWrap').scrollTop=0;
-  const renders={home:renderHome,expenses:renderExpenses,income:renderIncome,kanban:renderKanban,goals:renderGoals,debts:renderDebts,subscriptions:renderSubs,bills:renderBills,analytics:renderAnalytics,budget:renderBudget};
+  const renders={home:renderHome,expenses:renderExpenses,income:renderIncome,kanban:renderKanban,goals:renderGoals,debts:renderDebts,subscriptions:renderSubs,bills:renderBills,analytics:renderAnalytics,budget:renderBudget,admin:loadAdminData};
   if(renders[t])renders[t]();
 }
 
@@ -2490,6 +2536,7 @@ async function onSignedIn(user, pullData=true){
   currentUser = user;
   hideAuthScreen();
   updateHeaderUser(user);
+  checkAndShowAdminBtn();
   if(pullData){
     setCloudStatus('syncing','جاري المزامنة...');
     await syncFromCloud();
@@ -2538,7 +2585,7 @@ async function syncFromCloud(){
       saveState(); // update localStorage cache
       lastSyncAt = new Date(data.updated_at || Date.now());
       // re-render active screen
-      const renders={home:renderHome,expenses:renderExpenses,income:renderIncome,kanban:renderKanban,goals:renderGoals,debts:renderDebts,subscriptions:renderSubs,bills:renderBills,analytics:renderAnalytics,budget:renderBudget};
+      const renders={home:renderHome,expenses:renderExpenses,income:renderIncome,kanban:renderKanban,goals:renderGoals,debts:renderDebts,subscriptions:renderSubs,bills:renderBills,analytics:renderAnalytics,budget:renderBudget,admin:loadAdminData};
       if(renders[curTab]) renders[curTab]();
       showToast('✅ تمت المزامنة من السحابة','success');
     } else {
@@ -2652,6 +2699,133 @@ function applyThemeDirect(mode){
 /* ════════════════════════════════
    INIT
 ════════════════════════════════ */
+
+/* ════════════════════════════════
+   ADMIN PANEL
+════════════════════════════════ */
+const ADMIN_EMAIL = 'cclantos@gmail.com';
+
+function isAdmin(){
+  return currentUser && currentUser.email === ADMIN_EMAIL;
+}
+
+function checkAndShowAdminBtn(){
+  const existing = document.getElementById('adminNavBtn');
+  if(isAdmin() && !existing){
+    // أضف زر الأدمن في الإعدادات
+    const sg = document.querySelector('#screen-settings .settings-group');
+    if(sg){
+      const btn = document.createElement('div');
+      btn.id = 'adminNavBtn';
+      btn.className = 'settings-row';
+      btn.onclick = () => switchTab('admin');
+      btn.innerHTML = `
+        <div class="sr-icon" style="background:linear-gradient(135deg,rgba(244,63,94,.2),rgba(244,63,94,.1));border:1px solid rgba(244,63,94,.2)">
+          <svg viewBox="0 0 24 24" style="stroke:var(--red)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="sr-info">
+          <div class="sr-title">لوحة الإدارة</div>
+          <div class="sr-sub">إحصائيات وإدارة المستخدمين</div>
+        </div>
+        <div class="sr-arr"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      `;
+      sg.appendChild(btn);
+    }
+  }
+}
+
+async function loadAdminData(){
+  if(!isAdmin()){ showToast('غير مصرح لك بالدخول','error'); return; }
+  if(!sbClient){ showToast('Supabase غير متصل','error'); return; }
+
+  document.getElementById('adminUserCount').textContent = '...';
+  document.getElementById('adminTxCount').textContent   = '...';
+  document.getElementById('adminUsersList').innerHTML   = '<div style="text-align:center;padding:20px;color:var(--text2)">جاري التحميل...</div>';
+
+  try{
+    // جلب كل المستخدمين من user_data
+    const {data, error} = await sbClient.from('user_data').select('user_id, data, updated_at');
+    if(error) throw error;
+
+    const users = data || [];
+    let totalTx = 0;
+    const today = new Date().toDateString();
+    let activeToday = 0;
+
+    users.forEach(u => {
+      const d = u.data || {};
+      totalTx += (d.txList || []).length;
+      if(u.updated_at && new Date(u.updated_at).toDateString() === today) activeToday++;
+    });
+
+    document.getElementById('adminUserCount').textContent  = users.length;
+    document.getElementById('adminTxCount').textContent    = totalTx;
+    document.getElementById('adminActiveCount').textContent = activeToday;
+
+    // عرض قائمة المستخدمين
+    const listEl = document.getElementById('adminUsersList');
+    if(!users.length){
+      listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2)">لا يوجد مستخدمون بعد</div>';
+      return;
+    }
+
+    listEl.innerHTML = users.map((u,i) => {
+      const d = u.data || {};
+      const txCount    = (d.txList  || []).length;
+      const goalCount  = (d.goals   || []).length;
+      const debtCount  = (d.debts   || []).length;
+      const lastUpdate = u.updated_at ? new Date(u.updated_at).toLocaleDateString('ar-IQ') : '—';
+      const shortId    = u.user_id ? u.user_id.slice(0,8)+'...' : '—';
+
+      return `<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:9px;backdrop-filter:blur(8px)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--teal3),var(--teal));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#041420;flex-shrink:0">${i+1}</div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--text);direction:ltr">${shortId}</div>
+              <div style="font-size:10.5px;color:var(--text3);margin-top:1px">آخر نشاط: ${lastUpdate}</div>
+            </div>
+          </div>
+          <button onclick="confirmDeleteUser('${u.user_id}')" style="background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.25);border-radius:8px;color:var(--red);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:inherit;transition:var(--tr)">حذف</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
+          <div style="background:var(--card2);border-radius:9px;padding:8px;text-align:center">
+            <div style="font-size:16px;font-weight:800;color:var(--teal)">${txCount}</div>
+            <div style="font-size:10px;color:var(--text3)">عملية</div>
+          </div>
+          <div style="background:var(--card2);border-radius:9px;padding:8px;text-align:center">
+            <div style="font-size:16px;font-weight:800;color:var(--amber)">${goalCount}</div>
+            <div style="font-size:10px;color:var(--text3)">هدف</div>
+          </div>
+          <div style="background:var(--card2);border-radius:9px;padding:8px;text-align:center">
+            <div style="font-size:16px;font-weight:800;color:var(--red)">${debtCount}</div>
+            <div style="font-size:10px;color:var(--text3)">دين</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+  } catch(e){
+    console.error('Admin load error:', e);
+    showToast('خطأ في تحميل البيانات: ' + e.message, 'error');
+    document.getElementById('adminUsersList').innerHTML = `<div style="text-align:center;padding:20px;color:var(--red)">خطأ: ${e.message}</div>`;
+  }
+}
+
+async function confirmDeleteUser(userId){
+  if(!isAdmin()) return;
+  if(!confirm('⚠️ هل أنت متأكد من حذف هذا المستخدم وكل بياناته؟ هذا الإجراء لا يمكن التراجع عنه!')) return;
+  try{
+    const {error} = await sbClient.from('user_data').delete().eq('user_id', userId);
+    if(error) throw error;
+    showToast('✅ تم حذف المستخدم','success');
+    loadAdminData();
+  } catch(e){
+    showToast('خطأ في الحذف: ' + e.message,'error');
+  }
+}
+
+
 window.addEventListener('load',async ()=>{
   // 1. تحميل الإعدادات (الثيم + سعر الصرف)
   loadSettings();
