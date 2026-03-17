@@ -965,7 +965,7 @@ html.light .toast{background:rgba(240,246,255,.95)}
 @media (min-width: 1024px) {
   body {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     min-height: 100vh;
     background: var(--bg);
@@ -982,10 +982,14 @@ html.light .toast{background:rgba(240,246,255,.95)}
     display: flex;
     gap: 24px;
     align-items: flex-start;
+    justify-content: center;
     width: 100%;
     max-width: 1100px;
     padding: 20px;
     box-sizing: border-box;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
   }
 
   /* التطبيق على اليمين */
@@ -1099,6 +1103,21 @@ html.light .toast{background:rgba(240,246,255,.95)}
 @media (min-width: 1280px) {
   .desktop-wrapper { max-width: 1200px }
   .app { max-width: 440px; width: 440px }
+}
+
+
+/* ══ GUARANTEE APP VISIBILITY ══ */
+#mainApp {
+  display: flex !important;
+  flex-direction: column;
+}
+/* موبايل: الـ wrapper يكون block بسيط */
+#desktopWrapper {
+  display: block;
+  width: 100%;
+}
+#desktopPanel {
+  display: none;
 }
 
 </style>
@@ -1247,8 +1266,8 @@ html.light .toast{background:rgba(240,246,255,.95)}
 <div class="loader-overlay" id="loader"><div class="loader-logo">أموالي</div><div style="font-size:12px;color:rgba(45,212,191,.6);margin-top:-8px;font-weight:500">المالية الذكية</div><div class="loader-ring"></div><div class="loader-dots"><span></span><span></span><span></span></div></div>
 
 <!-- Desktop Panel — يظهر فقط على الشاشات الكبيرة -->
-<div class="desktop-wrapper" id="desktopWrapper" style="display:none">
-  <div class="desktop-panel" id="desktopPanel">
+<div class="desktop-wrapper" id="desktopWrapper">
+  <div class="desktop-panel" id="desktopPanel" style="display:none">
 
     <!-- Welcome -->
     <div class="dp-card" style="animation-delay:.05s">
@@ -1669,7 +1688,6 @@ html.light .toast{background:rgba(240,246,255,.95)}
   <button class="nav-btn active" id="nav-home" onclick="switchTab('home')"><div class="nav-ind"></div><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>الرئيسية</button>
 </nav>
 </div><!-- /app -->
-
   </div><!-- /mainApp -->
 </div><!-- /desktop-wrapper -->
 
@@ -3374,25 +3392,41 @@ function isDesktop(){ return window.innerWidth >= 1024 }
 function isTablet(){ return window.innerWidth >= 768 }
 
 function setupResponsive(){
-  const wrapper = document.getElementById('desktopWrapper');
+  const panel = document.getElementById('desktopPanel');
   const mainApp = document.getElementById('mainApp');
-  if(!wrapper || !mainApp) return;
+  if(!mainApp) return;
 
   if(isDesktop()){
-    // إظهار الـ wrapper وإخفاء الـ app المستقل
-    wrapper.style.display = 'flex';
-    // نقل الـ app داخل الـ wrapper إذا مو موجود
-    mainApp.style.position = 'sticky';
-    mainApp.style.top = '20px';
+    // الديسكتوب — أظهر اللوحة الجانبية
+    if(panel) panel.style.display = 'flex';
+    mainApp.style.maxWidth = '440px';
+    mainApp.style.width = '440px';
+    mainApp.style.height = 'calc(100dvh - 40px)';
+    mainApp.style.borderRadius = '32px';
+    mainApp.style.border = '1px solid var(--border)';
+    mainApp.style.boxShadow = '0 40px 100px rgba(0,0,0,.4)';
+    mainApp.style.margin = '20px 0';
     updateDesktopPanel();
   } else if(isTablet()){
-    wrapper.style.display = 'none';
-    mainApp.style.position = 'relative';
-    mainApp.style.top = '';
+    // تابلت
+    if(panel) panel.style.display = 'none';
+    mainApp.style.maxWidth = '480px';
+    mainApp.style.width = '';
+    mainApp.style.height = 'calc(100dvh - 40px)';
+    mainApp.style.borderRadius = '28px';
+    mainApp.style.border = '1px solid var(--border)';
+    mainApp.style.boxShadow = '0 32px 80px rgba(0,0,0,.35)';
+    mainApp.style.margin = '20px auto';
   } else {
-    wrapper.style.display = 'none';
-    mainApp.style.position = 'relative';
-    mainApp.style.top = '';
+    // موبايل — الوضع الافتراضي
+    if(panel) panel.style.display = 'none';
+    mainApp.style.maxWidth = '430px';
+    mainApp.style.width = '';
+    mainApp.style.height = '100dvh';
+    mainApp.style.borderRadius = '';
+    mainApp.style.border = '';
+    mainApp.style.boxShadow = '';
+    mainApp.style.margin = '0 auto';
   }
 }
 
