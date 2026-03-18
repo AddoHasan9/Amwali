@@ -15,7 +15,13 @@ js = js.replace("const SUPABASE_URL", warning + "const SUPABASE_URL")
 html = html.replace('/* CSS_PLACEHOLDER */', css)
 html = html.replace('// JS_PLACEHOLDER', js)
 
+# حفظ في مجلد public/ لـ Vercel
+os.makedirs('public', exist_ok=True)
+with open('public/index.html', 'w', encoding='utf-8') as f:
+    f.write(html)
+
+# حفظ نسخة محلية أيضاً
 with open('index.html', 'w', encoding='utf-8') as f:
     f.write(html)
 
-print("Merge complete: index.html generated")
+print("Merge complete: public/index.html generated")
