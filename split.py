@@ -23,19 +23,21 @@ def split_html(file_path):
         f.write(html_skeleton)
 
 if __name__ == '__main__':
-    # يقبل اسم الملف كـ argument أو يبحث تلقائياً
+    SKIP = {'temp_index.html', 'index.html'}
+
     if len(sys.argv) > 1:
         source = sys.argv[1]
     else:
-        candidates = [f for f in os.listdir('.') if f.endswith('.html') and f not in ('temp_index.html', 'index.html')]
-        if not candidates:
-            print("❌ لم يتم إيجاد ملف HTML مصدر!")
-            sys.exit(1)
-        source = sorted(candidates)[0]
-    
+        candidates = sorted([
+            f for f in os.listdir('.')
+            if f.endswith('.html') and f not in SKIP
+        ])
+        # إذا ما في ملف مصدر منفصل — استخدم index.html مباشرة
+        source = candidates[0] if candidates else 'index.html'
+
     if not os.path.exists(source):
         print(f"❌ الملف غير موجود: {source}")
         sys.exit(1)
-    
+
     split_html(source)
     print(f"Extraction complete. ({source})")

@@ -1,15 +1,5 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ]
+  "outputDirectory": "public",
+  "buildCommand": "python3 split.py && python3 cleanup_css.py && python3 patch.py && python3 merge.py",
+  "installCommand": "echo 'no install needed'"
 }
