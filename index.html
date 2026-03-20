@@ -1219,6 +1219,17 @@ html.light .toast{background:rgba(240,246,255,.95)}
 }
 .ai-typing span:nth-child(2){animation-delay:.2s}
 .ai-typing span:nth-child(3){animation-delay:.4s}
+/* ════════════════════════════════
+   UTILITIES
+════════════════════════════════ */
+.scr-title { font-size:15px; font-weight:800; color:var(--text); }
+.scr-header { padding:12px 16px 8px; display:flex; align-items:center; justify-content:space-between; }
+.scr-header-alt { padding:14px 16px 8px; display:flex; align-items:center; justify-content:space-between; }
+.text-muted { font-size:10px; color:var(--text3); }
+.text-subtitle { font-size:13px; font-weight:700; color:var(--text); }
+.text-sub2 { font-size:11px; color:var(--text2); margin-top:2px; }
+.px-16 { padding:0 16px; }
+.h-20 { height:20px; }
 
 </style>
 </head>
@@ -1905,7 +1916,7 @@ html.light .toast{background:rgba(240,246,255,.95)}
         تحليل عاداتي المالية
       </button>
     </div>
-    <div id="analysisResult" style="padding:0 16px"></div>
+    <div id="analysisResult" class="px-16"></div>
   </div>
 
   <!-- ══ CLASSIFY TAB ══ -->
@@ -1919,7 +1930,7 @@ html.light .toast{background:rgba(240,246,255,.95)}
         🏷️ صنّف تلقائياً
       </button>
     </div>
-    <div id="classifyResult" style="padding:0 16px"></div>
+    <div id="classifyResult" class="px-16"></div>
   </div>
 
   <!-- ══ REPORT TAB ══ -->
@@ -1935,7 +1946,7 @@ html.light .toast{background:rgba(240,246,255,.95)}
         📋 إنشاء التقرير الشهري
       </button>
     </div>
-    <div id="reportResult" style="padding:0 16px"></div>
+    <div id="reportResult" class="px-16"></div>
   </div>
 
   <div class="h-20"></div>
@@ -3284,6 +3295,8 @@ function showToast(msg,type='info'){const t=document.getElementById('toast');t.t
 // ⚠️ SECURITY WARNING: The use of a service_role key here exposes the database to full administrative access.
 
 // ⚠️ SECURITY WARNING: The use of a service_role key here exposes the database to full administrative access.
+
+// ⚠️ SECURITY WARNING: The use of a service_role key here exposes the database to full administrative access.
 const SUPABASE_URL = 'https://aonjbxyhhtqeizqnrovv.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvbmpieHloaHRxZWl6cW5yb3Z2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjg4NDQsImV4cCI6MjA4OTMwNDg0NH0.LeROKH6SE1MhTon-c0R1oNb7atYDaPD6pU-JevqqpFk';
 
@@ -4394,7 +4407,7 @@ function buildFinancialContext(){
   const debtTotal   = activeDebts.reduce((s,d)=>s+Math.max(0,d.amount-(d.paidAmount||0)),0);
 
   // الأهداف
-  const goalsInfo = goals.map(g=>`${g.name}: ${Math.round((g.current/g.target)*100)}%`).join('، ');
+  const goalsInfo = goals.map(g=>`${esc(g.name)}: ${Math.round((g.current/g.target)*100)}%`).join('، ');
 
   // الميزانيات المتجاوزة
   const overBudgets = budgets.filter(b=>getBudgetSpent(b.category)>b.limit)
@@ -4554,8 +4567,7 @@ async function runClassify(){
   el.innerHTML = '<div class="ai-result-card"><div class="ai-typing"><span></span><span></span><span></span></div><div style="font-size:12px;color:var(--text2);margin-top:8px">جاري التصنيف...</div></div>';
 
   const categories = ['طعام','مواصلات','تسوق','فواتير','صحة','ترفيه','تعليم','سلفة','أخرى'];
-  const txData = uncategorized.map(t=>`- ID:${t.id} | "${t.name}" | ${iqd(t.amount)} د.ع`).join('
-');
+  const txData = uncategorized.map(t=>`- ID:${t.id} | "${t.name}" | ${iqd(t.amount)} دينار`).join('\n');
 
   try{
     const prompt = `صنّف هذه المصاريف العراقية في إحدى الفئات التالية فقط: ${categories.join('، ')}
@@ -4634,8 +4646,7 @@ async function runReport(){
     catTotals[t.category]=(catTotals[t.category]||0)+v;
   });
   const catsStr = Object.entries(catTotals).sort((a,b)=>b[1]-a[1])
-    .map(([c,v])=>`${c}: ${iqd(v)} د.ع`).join('
-');
+    .map(([c,v])=>`${c}: ${iqd(v)} د.ع`).join('\n');
 
   el.innerHTML = '<div class="ai-result-card"><div class="ai-typing"><span></span><span></span><span></span></div><div style="font-size:12px;color:var(--text2);margin-top:8px">جاري إنشاء التقرير...</div></div>';
 
@@ -4685,7 +4696,6 @@ ${catsStr||'لا توجد مصاريف'}
     el.innerHTML = '<div class="ai-result-card"><div style="color:var(--red)">خطأ في إنشاء التقرير</div></div>';
   }
 }
-
 </script>
 </body>
 </html>
