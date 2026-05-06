@@ -14,14 +14,37 @@
 // Service Worker — يشتغل offline
 if('serviceWorker' in navigator){
   const swCode=`
-    const CACHE='dananir-v1';
-    const ASSETS=['${location.href}'];
-    self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
-    self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{caches.open(CACHE).then(c=>c.put(e.request,res.clone()));return res;}))));
-  `;
+    const CACHE='amwali-v2';
+    self.addEventListener('install', e => self.skipWaiting());
+    self.addEventListener('activate', e => {
+      e.waitUntil(
+        caches.keys().then(keys => Promise.all(
+          keys.filter(k => k !== 'amwali-v2').map(k => caches.delete(k))
+        ))
+      );
+    });
+    self.addEventListener('fetch', e => {
+      const url = e.request.url;
+      // لا تعترض طلبات Supabase أو APIs الخارجية
+      if(url.includes('supabase.co') || url.includes('anthropic.com') || 
+         url.includes('googleapis.com') || url.includes('api.')) {
+        e.respondWith(fetch(e.request));
+        return;
+      }
+      // فقط cache الـ HTML الرئيسي
+      e.respondWith(
+        caches.match(e.request).then(r => r || fetch(e.request))
+      );
+    });
+  \`;
   const blob=new Blob([swCode],{type:'application/javascript'});
   const swUrl=URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(()=>{});
+  // امسح الـ SW القديم أولاً
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister());
+  }).then(() => {
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
+  });
 }
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
