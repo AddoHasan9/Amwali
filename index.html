@@ -3298,8 +3298,10 @@ function showToast(msg,type='info'){const t=document.getElementById('toast');t.t
 // ⚠️ SECURITY WARNING: The use of a service_role key here exposes the database to full administrative access.
 
 // ⚠️ SECURITY WARNING: The use of a service_role key here exposes the database to full administrative access.
-const SUPABASE_URL = 'https://vrmuooruwcjvghvraxia.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZybXVvb3J1d2NqdmdodnJheGlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NzU4OTUsImV4cCI6MjA5MzQ1MTg5NX0.kGpPEXwo94UfLisLiruEh25MxWGaIhKBR7sN-P_qJvw';
+
+// ⚠️ SECURITY WARNING: The use of a service_role key here exposes the database to full administrative access.
+const SUPABASE_URL = 'https://aonjbxyhhtqeizqnrovv.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvbmpieHloaHRxZWl6cW5yb3Z2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjg4NDQsImV4cCI6MjA4OTMwNDg0NH0.LeROKH6SE1MhTon-c0R1oNb7atYDaPD6pU-JevqqpFk';
 
 /* ═══ لا تعدّل ما تحت هذا السطر ═══ */
 const SB_CONFIG_KEY  = 'dananir_sb_config';
@@ -3708,7 +3710,7 @@ function applyThemeDirect(mode){
 ════════════════════════════════ */
 const ADMIN_EMAIL = 'cclantos@gmail.com';
 // service_role key — للأدمن فقط، لا يُستخدم إلا في loadAdminData
-const _SR = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZybXVvb3J1d2NqdmdodnJheGlhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Nzg3NTg5NSwiZXhwIjoyMDkzNDUxODk1fQ.xHpmkmyGEK8TJKVPlbWAN2C4uSy35xUATA641HnvlzI';
+const _SR = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvbmpieHloaHRxZWl6cW5yb3Z2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzcyODg0NCwiZXhwIjoyMDg5MzA0ODQ0fQ.pTtxXBVec39AOkgA2_xEFsJrW15w7wXQZkCZSD3E22Q';
 
 function isAdmin(){
   return currentUser && currentUser.email === ADMIN_EMAIL;
@@ -3719,7 +3721,7 @@ function getAdminClient(){
   if(!isAdmin()) return null;
   try{
     return window.supabase.createClient(
-      'https://vrmuooruwcjvghvraxia.supabase.co',
+      'https://aonjbxyhhtqeizqnrovv.supabase.co',
       _SR,
       { auth: { persistSession: false, autoRefreshToken: false } }
     );
